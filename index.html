@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Whiteboard</title>
+  <!-- <script
+      crossOrigin="anonymous"
+      src="//unpkg.com/react-scan/dist/auto.global.js"
+  ></script> -->
+  <script>
+    (function () {
+      const el = document.documentElement
+      const defaultTheme = 'system'
+      const storageKey = 'theme'
+      function updateDOM(theme) {
+        el.classList.remove('light', 'dark')
+        el.classList.add(theme)
+        el.style.colorScheme = theme
+      }
+      function getSystemTheme() {
+        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+      }
+      const themeName = localStorage.getItem(storageKey) || defaultTheme
+      const theme = themeName === 'system' ? getSystemTheme() : themeName
+      updateDOM(theme)
+    })();
+  </script>
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.tsx"></script>
+</body>
+
+</html>
