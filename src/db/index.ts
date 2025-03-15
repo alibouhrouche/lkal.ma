@@ -13,7 +13,7 @@ export interface Board {
   order: number;
   name: string;
   doc: Y.Doc;
-  thumbnail?: string;
+  thumbnail?: [string, string];
   created_at: Date;
   updated_at: Date;
   realmId?: string;
@@ -21,12 +21,22 @@ export interface Board {
   spaceId?: string;
 }
 
+export interface ISpace {
+  id: string
+  title: string
+  createdAt: string
+  realmId?: string
+  owner?: string
+}
+
 class DB extends Dexie {
   boards!: EntityTable<Board, "id">;
+  spaces!: EntityTable<ISpace, "id">;
   constructor() {
     super("boards", { Y, addons: [dexieCloud] });
     this.version(1).stores({
       boards: "id,order,name,created_at,updated_at,realmId,doc:Y,spaceId",
+      spaces: "id,title",
       realms: "@realmId",
       members: "@id,[realmId+email]",
       roles: "[realmId+name]",
