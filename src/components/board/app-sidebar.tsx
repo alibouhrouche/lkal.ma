@@ -14,9 +14,29 @@ import { ArrowLeftIcon } from "lucide-react";
 import { Virtuoso } from "react-virtuoso";
 import { Link } from "wouter";
 
-export function AppSidebar() {
+function BoardsList() {
   const id = useBoardId();
-  const boards = useLiveQuery(() => db.boards.orderBy("order").reverse().toArray());
+  const boards = useLiveQuery(() =>
+    db.boards.orderBy("order").reverse().toArray()
+  );
+  return (
+    <Virtuoso
+      className="h-screen"
+      data={boards}
+      components={{
+        Scroller,
+      }}
+      totalCount={boards?.length}
+      itemContent={(_, board) => (
+        <div className="mx-3 my-1">
+          <BoardCard key={board.id} board={board} currentBoardId={id} />
+        </div>
+      )}
+    />
+  );
+}
+
+export function AppSidebar() {
   return (
     <Sidebar>
       <SidebarHeader>
@@ -28,19 +48,7 @@ export function AppSidebar() {
         </Link>
       </SidebarHeader>
       <SidebarContent>
-        <Virtuoso
-          className="h-screen"
-          data={boards}
-          components={{
-            Scroller,
-          }}
-          totalCount={boards?.length}
-          itemContent={(_, board) => (
-            <div className="mx-3 my-1">
-              <BoardCard key={board.id} board={board} currentBoardId={id} />
-            </div>
-          )}
-        />
+        <BoardsList />
       </SidebarContent>
       <SidebarFooter />
     </Sidebar>
