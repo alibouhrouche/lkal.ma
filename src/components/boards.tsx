@@ -33,7 +33,6 @@ const gridComponents: GridComponents = {
       className="w-full sm:w-1/2 md:w-1/3 xl:w-1/4 2xl:w-1/5"
       style={{
         padding: "0.5rem",
-        // width: "33%",
         display: "flex",
         flex: "none",
         alignContent: "stretch",
@@ -58,11 +57,10 @@ const ItemWrapper = ({
 function NewBoard() {
   return (
     <Link href="/b/new" className="cursor-pointer rounded-xl">
-      <AspectRatio
-        ratio={16 / 9}
-        className="flex justify-center items-center bg-gray-400 hover:bg-gray-200 text-black rounded-lg overflow-hidden m-1"
-      >
-        <PlusCircleIcon className="size-12" />
+      <AspectRatio ratio={16 / 9} className="p-1 hover:bg-primary/50 rounded-xl">
+        <div className="h-full w-full flex justify-center items-center bg-gray-200 dark:bg-[#101011] text-black dark:text-white rounded-lg overflow-hidden">
+          <PlusCircleIcon className="size-12" />
+        </div>
       </AspectRatio>
     </Link>
   );
