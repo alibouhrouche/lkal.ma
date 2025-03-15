@@ -14,7 +14,7 @@ export default function BoardCard({
 }) {
   return (
     <div
-      className="cursor-pointer opacity-75 hover:opacity-100 transition-opacity data-[active=true]:opacity-100 data-[active=true]:bg-primary rounded-xl"
+      className="cursor-pointer data-[active=true]:bg-primary hover:bg-primary/50 rounded-xl"
       data-active={board.id === currentBoardId}
     >
       <AspectRatio
@@ -22,23 +22,29 @@ export default function BoardCard({
         className="relative rounded-lg overflow-hidden m-1"
       >
         {board.thumbnail ? (
-          <img
-            className="object-fit h-full w-full p-2 bg-white"
-            src={`data:image/svg+xml,${encodeURIComponent(board.thumbnail)}`}
-          />
+          <>
+            <img
+              className="object-fit h-full w-full p-2 bg-white dark:hidden"
+              src={`data:image/svg+xml,${encodeURIComponent(board.thumbnail[0])}`}
+            />
+            <img
+              className="object-fit h-full w-full p-2 bg-[#101011] hidden dark:block"
+              src={`data:image/svg+xml,${encodeURIComponent(board.thumbnail[1])}`}
+            />
+          </>
         ) : (
-          <div className="absolute bg-gray-200 h-full w-full" />
+          <div className="absolute bg-gray-200 dark:bg-[#101011] h-full w-full" />
         )}
         {currentBoardId !== board.id ? (
           <Link
             to={`/b/${board.id}`}
-            className="absolute inset-0 bg-gradient-to-t from-white from-10% to-50%"
+            className="absolute inset-0 bg-gradient-to-t from-white dark:from-black from-10% to-50%"
           />
         ) : (
-          <div className="absolute inset-0 bg-gradient-to-t from-white from-10% to-50" />
+          <div className="absolute inset-0 bg-gradient-to-t from-white dark:from-black from-10% to-50" />
         )}
         <div className="absolute bottom-0 w-full px-2">
-          <div className="text-black flex gap-2 items-center justify-between bg-opacity-50 p-1 text-xs">
+          <div className="text-black dark:text-white flex gap-2 items-center justify-between bg-opacity-50 p-1 text-xs">
             {currentBoardId !== board.id ? (
               <Link to={`/b/${board.id}`} className="flex-1">
                 {board.name}

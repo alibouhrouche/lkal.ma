@@ -35,6 +35,26 @@ function getCoverBounds(coverFrame?: TLFrameShape) {
   return new Box(x, y, w, h);
 }
 
+const WHITE_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" fill="none"><path fill="#fff" d="M0 0h1920v1080H0z"/></svg>`;
+const BLACK_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" fill="none"><path fill="#101011" d="M0 0h1920v1080H0z"/></svg>`;
+
+async function getThumbnailSvg(editor: Editor): Promise<[string, string] | undefined> {
+  const coverFrame = getCoverFrame(editor);
+  const shapes = getCoverShapes(editor, coverFrame);
+  if (shapes.length === 0) return [WHITE_SVG, BLACK_SVG];
+  const bounds = getCoverBounds(coverFrame);
+  const lightModeSvg = await editor.getSvgString(shapes, {
+    darkMode: false,
+    bounds,
+  });
+  const darkModeSvg = await editor.getSvgString(shapes, {
+    darkMode: true,
+    bounds,
+  });
+  if (!lightModeSvg || !darkModeSvg) return;
+  return [lightModeSvg.svg, darkModeSvg.svg];
+}
+
 export default function AppThumbnail() {
   const editor = useEditor();
   const id = useBoardId();
@@ -43,19 +63,7 @@ export default function AppThumbnail() {
     let timeout: number;
     let cancelled = false;
     async function screenshot() {
-      const coverFrame = getCoverFrame(editor);
-      const shapes = getCoverShapes(editor, coverFrame);
-      const bounds = getCoverBounds(coverFrame);
-      const svg =
-        shapes.length > 0
-          ? await editor.getSvgString(shapes, {
-              darkMode: false,
-              bounds,
-            })
-          : {
-              svg: `<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" fill="none"><path fill="#fff" d="M0 0h1920v1080H0z"/></svg>`,
-            };
-      const thumbnail = svg?.svg;
+      const thumbnail = await getThumbnailSvg(editor);
       if (cancelled || !thumbnail) return;
       db.boards.update(id, { thumbnail }).timeout(500);
     }
