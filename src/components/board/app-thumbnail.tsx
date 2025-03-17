@@ -35,7 +35,7 @@ function getCoverBounds(coverFrame?: TLFrameShape) {
   return new Box(x, y, w, h);
 }
 
-const WHITE_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" fill="none"><path fill="#fff" d="M0 0h1920v1080H0z"/></svg>`;
+const WHITE_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" fill="none"><path fill="#f9fafb" d="M0 0h1920v1080H0z"/></svg>`;
 const BLACK_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" fill="none"><path fill="#101011" d="M0 0h1920v1080H0z"/></svg>`;
 
 async function getThumbnailSvg(editor: Editor): Promise<[string, string] | undefined> {

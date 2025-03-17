@@ -8,6 +8,7 @@ import {
 import { navigate } from "wouter/use-browser-location";
 import { useCallback, useEffect, useState } from "react";
 import Dexie from "dexie";
+import { ask } from "@/components/prompts";
 
 type Observer = (fromLogout?: boolean) => void;
 
@@ -34,7 +35,18 @@ class LogoutObservable {
 const logoutObservable = new LogoutObservable();
 
 export function logout(fromLogout?: boolean) {
-  logoutObservable.logout(fromLogout);
+  ask({
+    type: "confirm",
+    title: "Logout",
+    message: "Are you sure you want to logout?",
+    destructive: true,
+    ok: "Logout",
+    callback: (confirmed) => {
+      if (confirmed) {
+        logoutObservable.logout(fromLogout);
+      }
+    },
+  })
 }
 
 const dbLink =

@@ -9,34 +9,39 @@ import { PlusIcon } from "lucide-react";
 
 const faq = [
   {
-    question: "What is your return policy?",
+    question: "Can I use lkal.ma without an account?",
     answer:
-      "You can return unused items in their original packaging within 30 days for a refund or exchange. Contact support for assistance.",
+      "Yes! You can start drawing right away without signing up.",
   },
   {
-    question: "How do I track my order?",
+    question: "What happens after the free 30-day sync trial?",
     answer:
-      "Track your order using the link provided in your confirmation email, or log into your account to view tracking details.",
+      "You can still use lkal.ma for free, but your data won't sync across devices unless you subscribe to a Pro plan.",
   },
   {
-    question: "Do you ship internationally?",
+    question: "Can I invite others to collaborate?",
     answer:
-      "Yes, we ship worldwide. Shipping fees and delivery times vary by location, and customs duties may apply for some countries.",
+      "Yes! You can share a link to your board with anyone, and they can join you in real time.",
   },
   {
-    question: "What payment methods do you accept?",
+    question: "How does offline mode work?",
     answer:
-      "We accept Visa, MasterCard, American Express, PayPal, Apple Pay, and Google Pay, ensuring secure payment options for all customers.",
+      "Any changes you make offline are saved locally and sync automatically when you reconnect.",
   },
   {
-    question: "What if I receive a damaged item?",
+    question: "What if I don't want to store my data in the cloud?",
     answer:
-      "Please contact our support team within 48 hours of delivery with photos of the damaged item. We’ll arrange a replacement or refund.",
+      "You can use lkal.ma locally without cloud storage. Plus, you can export your boards anytime.",
   },
   {
-    question: "How can I contact customer support?",
+    question: "Is there a mobile version?",
     answer:
-      "You can reach our support team via email at support@example.com or through the live chat on our website. We're available 24/7 to assist you.",
+      "lkal.ma works in the browser on all devices, with a dedicated mobile-friendly interface.",
+  },
+  {
+    question: "What makes this different from other whiteboard apps?",
+    answer:
+      "Unlike other tools, we offer seamless offline sync, an infinite canvas, and a privacy-focused approach, ensuring your ideas remain yours.",
   },
 ];
 
@@ -53,7 +58,7 @@ const FAQ = () => {
       <Accordion
         type="single"
         collapsible
-        className="mt-8 space-y-4 md:columns-2 gap-4"
+          className="mt-8 space-y-4 gap-4"
       >
         {faq.map(({ question, answer }, index) => (
           <AccordionItem

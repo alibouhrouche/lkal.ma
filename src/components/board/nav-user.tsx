@@ -2,10 +2,17 @@ import { UserLogin } from "dexie-cloud-addon";
 import { useMemo } from "react";
 import { Md5 } from "ts-md5";
 import { Avatar, AvatarImage } from "../ui/avatar";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from "../ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+} from "../ui/dropdown-menu";
 import { DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
 import { Button } from "../ui/button";
 import { logout } from "@/db/logout";
+import { Link } from "wouter";
 
 function License({ user }: { user: UserLogin }) {
   const { license } = user;
@@ -54,6 +61,9 @@ export default function NavUser({ user }: { user: UserLogin }) {
         <DropdownMenuLabel className="font-normal">
           <License user={user} />
         </DropdownMenuLabel>
+        <Link href="/boards">
+          <DropdownMenuItem>Boards</DropdownMenuItem>
+        </Link>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => logout()}>Logout</DropdownMenuItem>
       </DropdownMenuContent>

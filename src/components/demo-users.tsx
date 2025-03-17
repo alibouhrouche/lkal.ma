@@ -1,0 +1,91 @@
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { demoUsers } from "../../demoUsers.json";
+import { CirclePlay, Loader2 } from "lucide-react";
+import { Button } from "./ui/button";
+import { db } from "@/db";
+import { useCallback, useState } from "react";
+import { navigate } from "wouter/use-browser-location";
+import { toast } from "sonner";
+
+export default function DemoUsers() {
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState("");
+  const demoLogin = useCallback((email: string) => {
+    setLoading(email);
+    db.cloud
+      .login({
+        email,
+      })
+      .catch(() => {
+        toast.error("Failed to login");
+        setLoading("");
+        setOpen(false);
+      })
+      .then(() => {
+        setLoading("");
+        setOpen(false);
+        navigate("/boards");
+      });
+  }, []);
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button
+          variant="outline"
+          size="lg"
+          className="rounded-full text-base shadow-none"
+        >
+          <CirclePlay className="!h-5 !w-5" /> Visit Demo
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>
+            Choose a demo account to explore the features
+          </DialogTitle>
+          <DialogDescription>
+            The demo account an be accessed by anyone. It is a great way to
+            explore the features of the app without having to sign up.
+            Alternatively, you can sign up for a free account to create your own
+            boards and collaborate with your team, or continue without an
+            account.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="grid grid-cols-1 gap-4">
+          {Object.keys(demoUsers).map((user) => (
+            <Button
+              key={user}
+              variant="outline"
+              size="lg"
+              className="rounded-full text-base"
+              onClick={() => demoLogin(user)}
+            >
+              {loading === user && (
+                <Loader2 className="animate-spin h-5 w-5 mr-2" />
+              )}
+              <span>{user}</span>
+            </Button>
+          ))}
+          <Button
+            variant="outline"
+            size="lg"
+            className="rounded-full text-base"
+            onClick={() => {
+              setOpen(false);
+              navigate("/boards");
+            }}
+          >
+            Continue without an account
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}

@@ -16,6 +16,7 @@ type Data =
       type: "alert";
       title: string;
       message: string;
+      ok?: string;
       callback: (data: boolean | null) => void;
     }
   | {
@@ -23,6 +24,8 @@ type Data =
       title: string;
       message: string;
       destructive?: boolean;
+      ok?: string;
+      cancel?: string;
       callback: (data: boolean | null) => void;
     }
   | {
@@ -33,6 +36,8 @@ type Data =
       placeholder: string;
       default?: string;
       isPassword?: boolean;
+      ok?: string;
+      cancel?: string;
       callback: (data: string | null) => void;
     };
 
@@ -120,7 +125,7 @@ export function Prompts() {
                   close();
                 }}
               >
-                Cancel
+                {lastData.cancel ? lastData.cancel : "Cancel"}
               </Button>
               <Button
                 onClick={() => {
@@ -128,7 +133,7 @@ export function Prompts() {
                   close();
                 }}
               >
-                OK
+                {lastData.ok ? lastData.ok : "OK"}
               </Button>
             </AlertDialogFooter>
           </>
@@ -142,7 +147,7 @@ export function Prompts() {
                     close();
                   }}
                 >
-                  OK
+                  {lastData.ok ? lastData.ok : "OK"}
                 </Button>
               </>
             )}
@@ -155,7 +160,7 @@ export function Prompts() {
                     close();
                   }}
                 >
-                  Cancel
+                  {lastData.cancel ? lastData.cancel : "Cancel"}
                 </Button>
                 <Button
                   onClick={() => {
@@ -164,7 +169,7 @@ export function Prompts() {
                   }}
                   variant={lastData.destructive ? "destructive" : "default"}
                 >
-                  {lastData.destructive ? "Delete" : "OK"}
+                  {lastData.ok ? lastData.ok : (lastData.destructive ? "Delete" : "OK")}
                 </Button>
               </>
             )}

@@ -4,7 +4,9 @@ import NewBoard from "./components/board/new-board";
 import LogoutPage from "./components/logout-page";
 import { useAppRoute } from "./components/board";
 import Boards from "./components/boards";
+import { AppTitle } from "./components/board/app-title";
 import Home from "./components/home";
+import NotFound from "./components/NotFound";
 
 function App() {
   const route = useAppRoute();
@@ -14,6 +16,7 @@ function App() {
     case "board":
       return (
         <AppLayout>
+          <AppTitle />
           <AppBoard />
         </AppLayout>
       );
@@ -23,6 +26,8 @@ function App() {
       return <Boards />;
     case "new-board":
       return <NewBoard />;
+    default:
+      return <NotFound />;
   }
 }
 

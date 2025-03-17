@@ -17,7 +17,7 @@ import { Link } from "wouter";
 function BoardsList() {
   const id = useBoardId();
   const boards = useLiveQuery(() =>
-    db.boards.orderBy("order").reverse().toArray()
+    db.boards.orderBy("created_at").reverse().toArray()
   );
   return (
     <Virtuoso

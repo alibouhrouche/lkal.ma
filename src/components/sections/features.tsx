@@ -2,48 +2,53 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
   BookCheck,
   ChartPie,
+  CloudAlert,
+  Cookie,
   FolderSync,
   Goal,
+  InfinityIcon,
+  RadioTower,
+  ShieldUser,
   Users,
   Zap,
 } from "lucide-react";
 
 const features = [
   {
-    icon: Goal,
-    title: "Identify Opportunities",
+    icon: RadioTower,
+    title: "Real-Time Collaboration",
     description:
-      "Easily uncover untapped areas to explore and expand your reach effortlessly.",
+      "Work with your team in real time, with instant updates and no lag.",
   },
   {
-    icon: BookCheck,
-    title: "Build Authority",
+    icon: CloudAlert,
+    title: "Offline-First",
     description:
-      "Create valuable content that resonates, inspires trust, and positions you as an expert.",
-  },
-  {
-    icon: ChartPie,
-    title: "Instant Insights",
-    description:
-      "Gain immediate, actionable insights with a quick glance, enabling fast decision-making.",
-  },
-  {
-    icon: Users,
-    title: "Engage with Your Audience",
-    description:
-      "Boost audience engagement with interactive features like polls, quizzes, and forms.",
+      "No WiFi? No problem. Keep working, and your changes will sync automatically when you're back online.",
   },
   {
     icon: FolderSync,
-    title: "Automate Your Workflow",
+    title: "Automatic Cloud Sync",
     description:
-      "Streamline your processes by automating repetitive tasks, saving time and reducing effort.",
+      "All your work is securely stored and accessible across devices—with Dexie Cloud sync during the free trial or with a Pro plan.",
   },
   {
-    icon: Zap,
-    title: "Accelerate Growth",
+    icon: ShieldUser,
+    title: "No Login Required",
     description:
-      "Supercharge your growth by implementing strategies that drive results quickly and efficiently.",
+      "Start using the app immediately. No sign-up barriers—just start drawing."
+  },
+  {
+    icon: InfinityIcon,
+    title: "Infinite Canvas",
+    description:
+      "Expand your ideas without limits—sketch, write, and organize as freely as you need.",
+  },
+  {
+    icon: Cookie,
+    title: "Privacy-Focused",
+    description:
+      "Your data is encrypted and stored securely. You control who can see your boards.",
   },
 ];
 
@@ -51,7 +56,7 @@ const Features = () => {
   return (
     <div id="features" className="max-w-screen-xl mx-auto w-full py-20 px-6">
       <h2 className="text-4xl md:text-5xl md:leading-[3.5rem] font-bold tracking-tight sm:max-w-xl sm:text-center sm:mx-auto">
-        Boost Your Strategy with Smart Features
+        Features
       </h2>
       <div className="mt-14 w-full mx-auto grid md:grid-cols-2 lg:grid-cols-3 gap-x-10 gap-y-12">
         {features.map((feature) => (

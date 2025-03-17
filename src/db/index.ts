@@ -10,7 +10,6 @@ const nanoid = customAlphabet(alphabet, 23);
 
 export interface Board {
   id: string;
-  order: number;
   name: string;
   doc: Y.Doc;
   thumbnail?: [string, string];
@@ -24,7 +23,7 @@ export interface Board {
 export interface ISpace {
   id: string
   title: string
-  createdAt: string
+  created_at: Date;
   realmId?: string
   owner?: string
 }
@@ -35,7 +34,7 @@ class DB extends Dexie {
   constructor() {
     super("boards", { Y, addons: [dexieCloud] });
     this.version(1).stores({
-      boards: "id,order,name,created_at,updated_at,realmId,doc:Y,spaceId",
+      boards: "id,name,created_at,updated_at,realmId,doc:Y,spaceId",
       spaces: "id,title",
       realms: "@realmId",
       members: "@id,[realmId+email]",
@@ -55,15 +54,21 @@ class DB extends Dexie {
   }
   async newBoard() {
     const id = nanoid();
-    const lastBoard = await this.boards.orderBy("order").last();
-    const order = lastBoard ? lastBoard.order + 1 : 0;
     const now = new Date();
     return await this.boards.add({
       id,
-      order,
       name: "New Board",
       created_at: now,
       updated_at: now,
+    });
+  }
+  async newSpace(title: string) {
+    const id = nanoid();
+    const now = new Date();
+    return await this.spaces.add({
+      id,
+      title,
+      created_at: now,
     });
   }
 }
@@ -71,3 +76,4 @@ class DB extends Dexie {
 export const useUser = () => useObservable(db.cloud.currentUser);
 
 export const db = new DB();
+Reflect.set(window, "db", db);

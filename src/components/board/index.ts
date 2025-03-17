@@ -7,7 +7,7 @@ type RouteType =
       id: string;
     }
   | {
-      type: "home" | "logout" | "empty" | "boards" | "new-board";
+      type: "home" | "logout" | "boards" | "new-board" | "not-found" ;
     };
 
 type AppContextType = {
@@ -55,5 +55,5 @@ export const useRouteState = (): RouteType => {
   if (((results = /^\/b\/([^/]+?)$/.exec(location)), results)) {
     return { type: "board", id: decodeURIComponent(results[1]) };
   }
-  return { type: "empty" };
+  return { type: "not-found" };
 };

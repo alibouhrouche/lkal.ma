@@ -4,17 +4,20 @@ import { Button } from "../ui/button";
 import { ask } from "../prompts";
 import { Board, db } from "@/db";
 import { PencilIcon, Trash2Icon } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export default function BoardCard({
   board,
   currentBoardId,
+  classname,
 }: {
   board: Board;
   currentBoardId?: string;
+  classname?: string;
 }) {
   return (
     <div
-      className="cursor-pointer data-[active=true]:bg-primary hover:bg-primary/50 rounded-xl"
+      className={cn("cursor-pointer data-[active=true]:bg-primary hover:bg-primary/50 rounded-xl", classname)}
       data-active={board.id === currentBoardId}
     >
       <AspectRatio
@@ -24,7 +27,7 @@ export default function BoardCard({
         {board.thumbnail ? (
           <>
             <img
-              className="object-fit h-full w-full p-2 bg-white dark:hidden"
+              className="object-fit h-full w-full p-2 bg-[#f9fafb] dark:hidden"
               src={`data:image/svg+xml,${encodeURIComponent(board.thumbnail[0])}`}
             />
             <img
@@ -33,7 +36,7 @@ export default function BoardCard({
             />
           </>
         ) : (
-          <div className="absolute bg-gray-200 dark:bg-[#101011] h-full w-full" />
+          <div className="absolute bg-[#f9fafb] dark:bg-[#101011] h-full w-full" />
         )}
         {currentBoardId !== board.id ? (
           <Link

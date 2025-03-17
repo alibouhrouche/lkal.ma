@@ -35,9 +35,7 @@ export default function useStoreHook(
     [id]
   );
   const notFound = doc === false;
-  // const [notFound, setNotFound] = useState(false);
   useEffect(() => {
-    // setStoreWithStatus({ status: "loading" });
     const unsubs: (() => void)[] = [];
     // Create the store
     const store = createTLStore({
@@ -65,11 +63,6 @@ export default function useStoreHook(
       },
       { signal: abortController.signal }
     );
-
-    unsubs.push(() => {
-      abortController.abort();
-      provider.awareness.setLocalState(null);
-    });
 
     // function handleSync() {
     unsubs.push(
@@ -289,6 +282,8 @@ export default function useStoreHook(
     });
 
     return () => {
+      provider.awareness.setLocalState(null);
+      abortController.abort();
       setStoreWithStatus({ status: "loading" });
       store.dispose();
       if (doc) {
@@ -299,9 +294,6 @@ export default function useStoreHook(
       unsubs.forEach((fn) => fn());
       unsubs.length = 0;
     };
-  }, [doc, id, shapeUtils]);
-  useEffect(() => {
-    console.log("storeWithStatus", storeWithStatus.status);
-  }, [storeWithStatus]);
+  }, [doc, shapeUtils]);
   return { storeWithStatus, notFound };
 }

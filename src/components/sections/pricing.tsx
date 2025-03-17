@@ -2,52 +2,46 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
-import { CircleCheck } from "lucide-react";
 
 const plans = [
   {
-    name: "Starter",
-    price: 19,
+    name: "Free Trial",
+    price: 0,
     description:
-      "Get 20 AI-generated portraits with 2 unique styles and filters.",
+      "Try all features for free with unlimited boards and real-time collaboration.",
     features: [
-      "5 hours turnaround time",
-      "20 AI portraits",
-      "Choice of 2 styles",
-      "Choice of 2 filters",
-      "2 retouch credits",
+      "✅ Offline functionality",
+      "✅ Real-time collaboration",
+      "🚫 No cloud sync after 30 days",
     ],
-    buttonText: "Get 20 portraits in 5 hours",
+    buttonText: "Get started for free",
   },
   {
-    name: "Advanced",
+    name: "Pro Plan",
     price: 29,
     isRecommended: true,
     description:
-      "Get 50 AI-generated portraits with 5 unique styles and filters.",
+      "Unlock unlimited boards, cloud sync, and advanced features for your team.",
     features: [
-      "3 hours turnaround time",
-      "50 AI portraits",
-      "Choice of 5 styles",
-      "Choice of 5 filters",
-      "5 retouch credits",
+      "✅ Unlimited boards & cloud sync",
+      "✅ Priority access to new features",
+      "✅ Secure team collaboration",
+      "✅ Increased rate limits",
     ],
-    buttonText: "Get 50 portraits in 3 hours",
+    buttonText: "Upgrade to Pro",
     isPopular: true,
   },
   {
-    name: "Premium",
-    price: 49,
+    name: "Enterprise",
+    price: "Custom",
     description:
-      "Get 100 AI-generated portraits with 10 unique styles and filters.",
+      "Get custom pricing for your team with advanced features and support.",
     features: [
-      "1-hour turnaround time",
-      "100 AI portraits",
-      "Choice of 10 styles",
-      "Choice of 10 filters",
-      "10 retouch credits",
+      "✅ Custom branding & white-labeling",
+      "✅ Dedicated account manager",
+      "✅ Advanced analytics & reporting",
     ],
-    buttonText: "Get 100 portraits in 1 hour",
+    buttonText: "Contact us",
   },
 ];
 
@@ -73,7 +67,7 @@ const Pricing = () => {
               </Badge>
             )}
             <h3 className="text-lg font-medium">{plan.name}</h3>
-            <p className="mt-2 text-4xl font-bold">${plan.price}</p>
+            <p className="mt-2 text-4xl font-bold">{Number.isInteger(plan.price) ? `$${plan.price}` : plan.price}</p>
             <p className="mt-4 font-medium text-muted-foreground">
               {plan.description}
             </p>
@@ -81,7 +75,7 @@ const Pricing = () => {
             <ul className="space-y-2">
               {plan.features.map((feature) => (
                 <li key={feature} className="flex items-start gap-2">
-                  <CircleCheck className="h-4 w-4 mt-1 text-green-600" />
+                  {/* <CircleCheck className="h-4 w-4 mt-1 text-green-600" /> */}
                   {feature}
                 </li>
               ))}
