@@ -1,6 +1,6 @@
 import { PeopleMenu } from "tldraw";
 import LoginButton from "./login-button";
-// import ShareDialog from "./share-dialog";
+import ShareDialogTrigger from "./share-dialog";
 
 export default function SharePanel() {
   return (
@@ -9,8 +9,9 @@ export default function SharePanel() {
       style={{ pointerEvents: "all" }}
     >
       <PeopleMenu displayUserWhenAlone />
-      {/* <ShareDialog /> */}
-      <LoginButton />
+      <LoginButton>
+        <ShareDialogTrigger />
+      </LoginButton>
     </div>
   );
 }

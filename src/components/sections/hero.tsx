@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import { Button } from "@/components/ui/button";
 import { ArrowUpRight } from "lucide-react";
 import DemoUsers from "../demo-users";
@@ -31,6 +32,7 @@ const Hero = () => {
         <div className="relative lg:max-w-lg xl:max-w-xl w-full bg-accent rounded-xl aspect-square">
           <img
             src="/hero-image.jpg"
+            alt="Hero Image"
             className="object-cover rounded-xl"
           />
         </div>

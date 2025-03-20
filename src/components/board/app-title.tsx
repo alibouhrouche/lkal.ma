@@ -1,9 +1,10 @@
 import { db } from "@/db"
 import { useLiveQuery } from "dexie-react-hooks"
-import { useBoardId } from "."
+import { useLoaderData, useParams } from "react-router";
 
 export const AppTitle = () => {
-    const id = useBoardId()
+    const id = useParams().id!;
+    const preloaded = useLoaderData<{ title: string }>();
     const boardTitle = useLiveQuery(() => db.boards.get(id, b => b?.name ?? "Not Found"), [id]);
-    return <title>{`${boardTitle ?? "Loading..."} - Lkal.ma`}</title>
+    return <title>{`${boardTitle ?? preloaded.title} - Lkal.ma`}</title>
 }

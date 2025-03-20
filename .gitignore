@@ -24,6 +24,13 @@ dist-ssr
 *.sw?
 
 .env
+# ...
+.next
+next-env.d.ts
+
+# Serwist
+public/sw*
+public/swe-worker*
 
 # Dexie cloud
 dexie-cloud.json

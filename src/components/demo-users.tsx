@@ -6,17 +6,20 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { demoUsers } from "../../demoUsers.json";
+import demo from "../../demoUsers.json";
 import { CirclePlay, Loader2 } from "lucide-react";
 import { Button } from "./ui/button";
 import { db } from "@/db";
 import { useCallback, useState } from "react";
-import { navigate } from "wouter/use-browser-location";
+import { useNavigate } from "react-router";
 import { toast } from "sonner";
+
+const { demoUsers } = demo;
 
 export default function DemoUsers() {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState("");
+  const navigate = useNavigate();
   const demoLogin = useCallback((email: string) => {
     setLoading(email);
     db.cloud
@@ -33,7 +36,7 @@ export default function DemoUsers() {
         setOpen(false);
         navigate("/boards");
       });
-  }, []);
+  }, [navigate]);
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>

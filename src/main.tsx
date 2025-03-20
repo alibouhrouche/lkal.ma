@@ -1,5 +1,6 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
+import { BrowserRouter } from "react-router";
 import "./index.css";
 import App from "./App.tsx";
 import Providers from "./Providers.tsx";
@@ -36,12 +37,14 @@ if ("toBase64" in ArrayBuffer.prototype === false) {
 }
 
 // Remove the title tag from the head to prevent the title from being set twice
-document.head.removeChild(document.getElementsByTagName("title")[0])
+document.head.removeChild(document.getElementsByTagName("title")[0]);
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <Providers>
-      <App />
-    </Providers>
+    <BrowserRouter>
+      <Providers>
+        <App />
+      </Providers>
+    </BrowserRouter>
   </StrictMode>
 );

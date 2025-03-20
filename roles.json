@@ -1,0 +1,16 @@
+{
+    "roles": {
+        "editor": {
+            "displayName": "Editor",
+            "description": "Can edit content",
+            "sortOrder": 1,
+            "permissions": { "update": ["boards"] }
+        },
+        "viewer": {
+            "displayName": "Viewer",
+            "description": "Can view content",
+            "sortOrder": 2,
+            "permissions": { }
+        }
+    }
+}

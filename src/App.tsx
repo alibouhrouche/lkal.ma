@@ -1,34 +1,14 @@
-import AppBoard from "./components/board/app-board";
-import AppLayout from "./components/board/app-layout";
-import NewBoard from "./components/board/new-board";
-import LogoutPage from "./components/logout-page";
-import { useAppRoute } from "./components/board";
-import Boards from "./components/boards";
-import { AppTitle } from "./components/board/app-title";
-import Home from "./components/home";
-import NotFound from "./components/NotFound";
+import { Outlet } from "react-router";
+import AppGlobals from "./components/board/app-globals";
+import { NuqsAdapter } from 'nuqs/adapters/react-router/v7'
 
 function App() {
-  const route = useAppRoute();
-  switch (route.type) {
-    case "home":
-      return <Home />;
-    case "board":
-      return (
-        <AppLayout>
-          <AppTitle />
-          <AppBoard />
-        </AppLayout>
-      );
-    case "logout":
-      return <LogoutPage />;
-    case "boards":
-      return <Boards />;
-    case "new-board":
-      return <NewBoard />;
-    default:
-      return <NotFound />;
-  }
+  return (
+    <NuqsAdapter>
+      <Outlet />
+      <AppGlobals />
+    </NuqsAdapter>
+  );
 }
 
 export default App;

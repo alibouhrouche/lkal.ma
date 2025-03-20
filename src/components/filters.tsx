@@ -18,7 +18,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { useLiveQuery } from "dexie-react-hooks";
 import { db, ISpace } from "@/db";
 import { Badge } from "./ui/badge";
 import {
@@ -46,14 +45,22 @@ function SelectedCollections({ selected }: { selected: ISpace[] }) {
 }
 
 export function Filters({
-  selected,
+  collections,
+  selected = [],
   setSelected,
 }: {
-  selected: ISpace[];
-  setSelected: React.Dispatch<React.SetStateAction<ISpace[]>>;
+  collections?: ISpace[];
+  selected?: string[];
+  setSelected: React.Dispatch<React.SetStateAction<string[]>>;
 }) {
   const [open, setOpen] = React.useState(false);
   const isDesktop = useMediaQuery("(min-width: 768px)");
+
+  const filteredSelected = collections
+    ? selected
+        .map((s) => collections.find((c) => c?.id === s))
+        .filter((s) => !!s)
+    : [];
 
   if (isDesktop) {
     return (
@@ -61,7 +68,7 @@ export function Filters({
         <PopoverTrigger asChild>
           <Button variant="outline" className="w-[300px] justify-start">
             {selected.length > 0 ? (
-              <SelectedCollections selected={selected} />
+              <SelectedCollections selected={filteredSelected} />
             ) : (
               <>All Collections</>
             )}
@@ -69,6 +76,7 @@ export function Filters({
         </PopoverTrigger>
         <PopoverContent className="w-[300px] p-0" align="start">
           <CollectionList
+            collections={collections}
             setOpen={setOpen}
             selected={selected}
             setSelected={setSelected}
@@ -83,7 +91,7 @@ export function Filters({
       <DrawerTrigger asChild>
         <Button variant="outline" className="w-[150px] justify-start">
           {selected.length > 0 ? (
-            <SelectedCollections selected={selected} />
+            <SelectedCollections selected={filteredSelected} />
           ) : (
             <>All Collections</>
           )}
@@ -92,6 +100,7 @@ export function Filters({
       <DrawerContent>
         <div className="mt-4 border-t">
           <CollectionList
+            collections={collections}
             setOpen={setOpen}
             selected={selected}
             setSelected={setSelected}
@@ -103,41 +112,41 @@ export function Filters({
 }
 
 function CollectionList({
+  collections,
   setOpen,
   selected,
   setSelected,
 }: {
+  collections?: ISpace[];
   setOpen: (open: boolean) => void;
-  selected: ISpace[];
-  setSelected: React.Dispatch<React.SetStateAction<ISpace[]>>;
+  selected: string[];
+  setSelected: React.Dispatch<React.SetStateAction<string[]>>;
 }) {
-  const collections = useLiveQuery(() => db.spaces.toArray());
   return (
     <Command>
-      <CommandInput placeholder="Filter status..." />
+      <CommandInput placeholder="Filter collections..." />
       <CommandList>
         <CommandEmpty>No results found.</CommandEmpty>
         <CommandGroup>
-          {collections?.map((status) => (
+          {collections?.map((collection) => (
             <CommandItem
-              key={status.id}
-              value={status.id}
+              key={collection.id}
+              value={collection.id}
               onSelect={(value) => {
                 setSelected((selected) => {
-                  const index = selected.findIndex((s) => s.id === value);
+                  const array = [...selected];
+                  const index = array.indexOf(value);
                   if (index === -1) {
-                    return [
-                      ...selected,
-                      collections.find((s) => s.id === value)!,
-                    ];
+                    array.push(value);
+                  } else {
+                    array.splice(index, 1);
                   }
-                  return selected.filter((s) => s.id !== value);
+                  return array;
                 });
-                setOpen(false);
               }}
             >
-              {selected.some((s) => s.id === status.id) && <CheckIcon />}
-              {status.title}
+              {selected.includes(collection.id) && <CheckIcon />}
+              {collection.title}
               <button
                 className="group ml-auto hover:bg-secondary rounded-full cursor-pointer"
                 onClick={(e) => {
@@ -154,11 +163,11 @@ function CollectionList({
                   ask({
                     type: "confirm",
                     title: "Delete Collection",
-                    message: `Are you sure you want to delete the collection "${status.title}"?`,
+                    message: `Are you sure you want to delete the collection "${collection.title}"?`,
                     destructive: true,
                     callback: (confirmed) => {
                       if (confirmed) {
-                        db.spaces.delete(status.id);
+                        db.spaces.delete(collection.id);
                       }
                     },
                   });

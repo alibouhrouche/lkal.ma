@@ -1,11 +1,12 @@
 import Dexie, { type EntityTable } from "dexie";
-import 'dexie-observable';
-import dexieCloud from "dexie-cloud-addon";
+// import 'dexie-observable';
+import dexieCloud, { UserLogin } from "dexie-cloud-addon";
 import * as Y from "yjs";
 import * as awarenessProtocol from "y-protocols/awareness";
-import { customAlphabet } from 'nanoid';
+import { customAlphabet } from "nanoid";
 import { useObservable } from "dexie-react-hooks";
-const alphabet = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+const alphabet =
+  "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 const nanoid = customAlphabet(alphabet, 23);
 
 export interface Board {
@@ -21,11 +22,11 @@ export interface Board {
 }
 
 export interface ISpace {
-  id: string
-  title: string
+  id: string;
+  title: string;
   created_at: Date;
-  realmId?: string
-  owner?: string
+  realmId?: string;
+  owner?: string;
 }
 
 class DB extends Dexie {
@@ -41,13 +42,17 @@ class DB extends Dexie {
       roles: "[realmId+name]",
     });
     this.cloud.configure({
-      databaseUrl: import.meta.env.VITE_DEXIE_CLOUD_DB_URL!,
+      databaseUrl: process.env.NEXT_PUBLIC_DEXIE_CLOUD_DB_URL!,
       // Enable Y.js awareness
       awarenessProtocol: awarenessProtocol,
       customLoginGui: true,
       requireAuth: false,
+      tryUseServiceWorker: true,
+      periodicSync: {
+        minInterval: 1 * 60 * 60 * 1000,
+      }
     });
-    this.cloud.sync();
+    // this.cloud.sync();
   }
   getBoard(id: string) {
     return this.boards.get(id);
@@ -75,5 +80,11 @@ class DB extends Dexie {
 
 export const useUser = () => useObservable(db.cloud.currentUser);
 
+export const userPromise = () =>
+  new Promise<UserLogin>((resolve) => {
+    db.cloud.sync().then(() => {
+      resolve(db.cloud.currentUser.value);
+    });
+  });
+
 export const db = new DB();
-Reflect.set(window, "db", db);

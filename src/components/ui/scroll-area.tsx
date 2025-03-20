@@ -49,6 +49,8 @@ const Scroller = React.forwardRef<
   );
 });
 
+Scroller.displayName = "Scroller";
+
 function ScrollBar({
   className,
   orientation = "vertical",

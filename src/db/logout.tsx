@@ -5,7 +5,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { navigate } from "wouter/use-browser-location";
+import { useNavigate } from "react-router";
 import { useCallback, useEffect, useState } from "react";
 import Dexie from "dexie";
 import { ask } from "@/components/prompts";
@@ -50,7 +50,7 @@ export function logout(fromLogout?: boolean) {
 }
 
 const dbLink =
-    (import.meta.env.VITE_DEXIE_CLOUD_DB_URL! || '')
+    (process.env.NEXT_PUBLIC_DEXIE_CLOUD_DB_URL! || '')
       .split('//')[1]
       ?.split('.')[0] || ''
 
@@ -59,6 +59,7 @@ const dbName = 'boards-' + dbLink
 export default function Logout() {
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState("Logging out...");
+  const navigate = useNavigate();
   const callback = useCallback((fromLogout?: boolean) => {
     if (!fromLogout) navigate("/logout");
     setOpen(true);
@@ -97,7 +98,7 @@ export default function Logout() {
         }, 3000);
         setMessage(error);
       });
-  }, []);
+  }, [navigate]);
   useEffect(() => {
     logoutObservable.subscribe(callback);
     return () => {

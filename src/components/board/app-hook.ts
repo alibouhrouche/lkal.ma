@@ -2,6 +2,7 @@ import { db } from "@/db";
 import { DexieYProvider } from "dexie";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useEffect, useState } from "react";
+import { useParams } from "react-router";
 import {
   computed,
   createPresenceStateDerivation,
@@ -21,12 +22,12 @@ import {
 } from "tldraw";
 import { YKeyValue } from "y-utility/y-keyvalue";
 import * as Y from "yjs";
-import { useBoardId } from ".";
+// import { useBoardId } from ".";
 
 export default function useStoreHook(
   shapeUtils: TLAnyShapeUtilConstructor[] = []
 ) {
-  const id = useBoardId();
+  const id = useParams().id!;
   const [storeWithStatus, setStoreWithStatus] = useState<TLStoreWithStatus>({
     status: "loading",
   });

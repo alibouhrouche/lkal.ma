@@ -5,18 +5,17 @@ import Hero from "@/components/sections/hero";
 import { Navbar } from "@/components/navbar";
 // import Pricing from "@/components/sections/pricing";
 // import Testimonial from "@/components/sections/testimonial";
-import { useUser } from "@/db";
-import { useEffect } from "react";
-import { useLocation } from "wouter";
+import { userPromise } from "@/db";
+import { redirect } from "react-router";
+
+export async function clientLoader() {
+  const user = await userPromise();
+  if (user?.isLoggedIn) {
+    return redirect("/boards");
+  }
+}
 
 export default function Home() {
-  const user = useUser();
-  const [, navigate] = useLocation();
-  useEffect(() => {
-    if (user?.isLoggedIn) {
-      navigate("/boards", { replace: true });
-    }
-  }, [user, navigate]);
   return (
     <>
       <title>lkal.ma - Whiteboarding Without Limits</title>

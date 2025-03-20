@@ -1,4 +1,4 @@
-import { Link } from "wouter";
+import { Link } from "react-router";
 import { buttonVariants } from "./ui/button";
 import { ArrowLeft } from "lucide-react";
 
@@ -12,7 +12,7 @@ export default function NotFound() {
         className={buttonVariants({
           variant: "link",
         })}
-        href="/"
+        to="/"
         replace
       >
         <ArrowLeft className="size-6" />

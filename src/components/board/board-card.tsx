@@ -1,4 +1,5 @@
-import { Link } from "wouter";
+/* eslint-disable @next/next/no-img-element */ // For data URLs SVGs
+import { Link } from "react-router";
 import { AspectRatio } from "../ui/aspect-ratio";
 import { Button } from "../ui/button";
 import { ask } from "../prompts";
@@ -29,10 +30,12 @@ export default function BoardCard({
             <img
               className="object-fit h-full w-full p-2 bg-[#f9fafb] dark:hidden"
               src={`data:image/svg+xml,${encodeURIComponent(board.thumbnail[0])}`}
+              alt={`Thumbnail for board "${board.name}"`}
             />
             <img
               className="object-fit h-full w-full p-2 bg-[#101011] hidden dark:block"
               src={`data:image/svg+xml,${encodeURIComponent(board.thumbnail[1])}`}
+              alt={`Thumbnail for board "${board.name}"`}
             />
           </>
         ) : (

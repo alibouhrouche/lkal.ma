@@ -7,15 +7,15 @@ import {
 } from "@/components/ui/sidebar";
 import { db } from "@/db";
 import { useLiveQuery } from "dexie-react-hooks";
-import { useBoardId } from ".";
 import { Scroller } from "../ui/scroll-area";
 import BoardCard from "./board-card";
 import { ArrowLeftIcon } from "lucide-react";
 import { Virtuoso } from "react-virtuoso";
-import { Link } from "wouter";
+import { Link } from "react-router";
+import { useParams } from "react-router";
 
 function BoardsList() {
-  const id = useBoardId();
+  const id = useParams().id!;
   const boards = useLiveQuery(() =>
     db.boards.orderBy("created_at").reverse().toArray()
   );
@@ -40,7 +40,7 @@ export function AppSidebar() {
   return (
     <Sidebar>
       <SidebarHeader>
-        <Link href="/boards">
+        <Link to="/boards">
           <SidebarMenuButton className="cursor-pointer">
             <ArrowLeftIcon size={24} />
             <span>See all boards</span>

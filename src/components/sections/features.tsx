@@ -1,16 +1,11 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
-  BookCheck,
-  ChartPie,
   CloudAlert,
   Cookie,
   FolderSync,
-  Goal,
   InfinityIcon,
   RadioTower,
   ShieldUser,
-  Users,
-  Zap,
 } from "lucide-react";
 
 const features = [

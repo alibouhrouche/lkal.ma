@@ -1,13 +1,13 @@
 import { db } from "@/db";
 import { useObservable } from "dexie-react-hooks";
-import { Link } from "wouter";
+import { Link, useNavigate } from "react-router";
 import { Button, buttonVariants } from "./ui/button";
 import { ArrowLeft } from "lucide-react";
-import { navigate } from "wouter/use-browser-location";
 import { logout } from "@/db/logout";
 
 export default function LogoutPage() {
   const user = useObservable(db.cloud.currentUser);
+  const navigate = useNavigate();
   if (user?.isLoggedIn) {
     return (
       <div className="flex flex-col gap-4 items-center justify-center h-screen">
@@ -19,7 +19,7 @@ export default function LogoutPage() {
             className={buttonVariants({
               variant: "link",
             })}
-            href="/"
+            to="/"
             replace
           >
             <ArrowLeft className="size-6" />
@@ -42,7 +42,7 @@ export default function LogoutPage() {
           className={buttonVariants({
             variant: "link",
           })}
-          href="/"
+          to="/"
           replace
         >
           <ArrowLeft className="size-6" />

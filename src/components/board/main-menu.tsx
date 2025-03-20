@@ -6,7 +6,7 @@ import {
 import { useSidebar } from "../ui/sidebar";
 import { PanelLeftIcon } from "lucide-react";
 import { db } from "@/db";
-import { useLocation } from "wouter";
+import { useNavigate } from "react-router";
 
 function SidebarTrigger() {
     const { toggleSidebar } = useSidebar()
@@ -25,7 +25,7 @@ function SidebarTrigger() {
   }
 
 export default function MainMenu() {
-  const [,navigate] = useLocation()
+  const navigate = useNavigate()
   return (
     <div className="flex items-center justify-between w-full">
       <SidebarTrigger />
