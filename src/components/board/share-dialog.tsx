@@ -53,10 +53,12 @@ function RoleSelect() {
 
 export function ShareDialog() {
   const [open, setOpen] = useState(false);
-  const share = useCallback(() => {
-    setOpen(true);
-  }, []);
-  useSubscribe(observable, share);
+  useSubscribe(
+    observable,
+    useCallback(() => {
+      setOpen(true);
+    }, [])
+  );
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent>
