@@ -200,21 +200,6 @@ export default function useStoreHook(
         if (toPut.length) store.put(toPut);
       });
     };
-    const handleMetaUpdate = () => {
-      const theirSchema = meta.get("schema");
-      if (!theirSchema) {
-        throw new Error("No schema found in the yjs doc");
-      }
-      // If the shared schema is newer than our schema, the user must refresh
-      const newMigrations = store.schema.getMigrationsSince(theirSchema);
-
-      if (!newMigrations.ok || newMigrations.value.length > 0) {
-        window.alert("The schema has been updated. Please refresh the page.");
-        yDoc.destroy();
-      }
-    };
-    meta.observe(handleMetaUpdate);
-    unsubs.push(() => meta.unobserve(handleMetaUpdate));
 
     provider.awareness.on("update", handleUpdate);
     unsubs.push(() => provider.awareness.off("update", handleUpdate));

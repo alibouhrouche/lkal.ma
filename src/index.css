@@ -59,7 +59,7 @@
   --destructive: hsl(0 62.8% 30.6%);
   --destructive-foreground: hsl(210 20% 98%);
   --border: hsl(215 27.9% 16.9%);
-  --input: hsl(215 27.9% 16.9%);
+  --input: hsl(240 7% 14%);
   --ring: hsl(263.4 70% 50.4%);
   --scrollbar: hsl(263.4 27.9% 36.9%);
   --chart-1: hsl(220 70% 50%);
@@ -126,6 +126,12 @@
   }
   .pointer-events-all {
     pointer-events: all;
+  }
+  .tl-cursor-pointer {
+    cursor: var(--tl-cursor-pointer);
+  }
+  .tl-cursor {
+    cursor: var(--tl-cursor);
   }
 }
 

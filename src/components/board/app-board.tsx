@@ -3,32 +3,38 @@
 import AppEvents from "@/components/board/app-events";
 import MainMenu from "@/components/board/main-menu";
 import { useTheme } from "next-themes";
-import { TLComponents, Tldraw, TLUiAssetUrls } from "tldraw";
+import { TLComponents, Tldraw } from "tldraw";
 import "tldraw/tldraw.css";
 import useStoreHook from "./app-hook";
 import NotFound from "./not-found";
 import SharePanel from "./share-panel";
 import AppThumbnail from "./app-thumbnail";
-import { getAssetUrls } from "@tldraw/assets/selfHosted";
 import { ShareDialog } from "./share-dialog";
 import { useQueryState } from "nuqs";
-
-const assetUrls = getAssetUrls() as unknown as TLUiAssetUrls;
+import { ComponentTool, ComponentUtil } from "../tools";
+import { customAssetUrls, toolsComponents, uiOverrides } from "../tools/ui-overrides";
 
 const components: TLComponents = {
   // Define your components here
   MainMenu,
   SharePanel,
+  ...toolsComponents,
 };
 
+const shapeUtils = [ComponentUtil];
+const tools = [ComponentTool];
+
 export default function AppBoard() {
-  const { storeWithStatus, notFound } = useStoreHook();
+  const { storeWithStatus, notFound } = useStoreHook([ComponentUtil]);
   const { theme, setTheme } = useTheme();
   const [, setDeeplink] = useQueryState("d");
   return (
     <Tldraw
-      assetUrls={assetUrls}
+      assetUrls={customAssetUrls}
       components={components}
+      shapeUtils={shapeUtils}
+      tools={tools}
+      overrides={uiOverrides}
       store={storeWithStatus}
       onMount={(editor) => {
         editor.user.updateUserPreferences({
@@ -41,9 +47,6 @@ export default function AppBoard() {
         }
       }}
       deepLinks={{
-        getUrl() {
-          return new URL(window.location.href);
-        },
         onChange(url) {
           setDeeplink(url.searchParams.get("d"));
         },
