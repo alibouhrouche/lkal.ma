@@ -22,8 +22,8 @@ import { db, ISpace } from "@/db";
 import { Badge } from "./ui/badge";
 import {
   CheckIcon,
+  PenLineIcon,
   PlusCircleIcon,
-  Settings2Icon,
   Trash2Icon,
 } from "lucide-react";
 import { ask } from "./prompts";
@@ -151,10 +151,21 @@ function CollectionList({
                 className="group ml-auto hover:bg-secondary rounded-full cursor-pointer"
                 onClick={(e) => {
                   e.stopPropagation();
-                  console.log("Settings clicked");
+                  ask({
+                    type: "prompt",
+                    title: "Rename Collection",
+                    message: "What would you like to rename this collection?",
+                    label: "Collection Name",
+                    placeholder: "Collection Name",
+                    default: collection.title,
+                    callback: (value) => {
+                      if (!value) return;
+                      db.spaces.update(collection.id, { title: value });
+                    }
+                  })
                 }}
               >
-                <Settings2Icon className="text-foreground/80 group-hover:text-foreground" />
+                <PenLineIcon className="text-foreground/80 group-hover:text-foreground" />
               </button>
               <button
                 className="group ml-2 hover:bg-secondary rounded-full cursor-pointer"
