@@ -5,6 +5,10 @@ import type {
   ComponentTypeStyle,
   ComponentShapeProps,
 } from ".";
+import { preloadImage, textGeneration } from "./ai";
+import { marked } from "marked";
+import DOMPurify from "dompurify";
+import { defaultConfig } from "./image";
 
 type MaybePromise<T> = T | Promise<T>;
 
@@ -90,32 +94,114 @@ export const runners: Record<
       return {
         data: [{ type: "text", text: shape.props.value }],
       };
-    let ins: Record<string, string> = {};
-    inputs.forEach((input) => {
+    const ins: Record<string, string> = {};
+    const unamed = inputs.filter(
+      (input) =>
+        !input.name && input.shape.props.data.some((d) => d.type === "text")
+    );
+    const named = inputs.filter(
+      (input) =>
+        input.name && input.shape.props.data.some((d) => d.type === "text")
+    );
+    let value = shape.props.value;
+    if (unamed.length === 1) {
+      value = unamed
+        .map((input) => input.shape.props.data.find((d) => d.type === "text"))
+        .filter(Boolean)
+        .map((d) => d?.text)
+        .join("\n");
+    }
+    named.forEach((input) => {
+      const data = input.shape.props.data.find((d) => d.type === "text");
       const dom = new DOMParser().parseFromString(
-        input.shape.props.value,
+        data?.text || "",
         "text/html"
       );
       const value = dom.body.textContent || "";
-      if (input.name) ins[input.name] = value;
-      else if (value.startsWith("{")) {
-        let data = {};
-        try {
-          console.log(value);
-          data = JSON.parse(value);
-        } catch (e) {
-          console.error(e);
-        }
-        ins = { ...ins, ...data };
-      }
+      ins[input.name!] = value;
     });
+    return {
+      value,
+      data: [
+        {
+          type: "text",
+          text: interpolate(value, ins),
+        },
+      ],
+    };
+  },
+  async image({ shape, editor }) {
+    const inputs = getInputs(editor, shape);
+    if (inputs.length !== 1) return {};
+    const prompt = new DOMParser().parseFromString(
+      inputs[0].shape.props.value,
+      "text/html"
+    ).body.textContent;
+    if (!prompt) return {};
+    const conf = shape.props.config || defaultConfig;
+    const seed = conf.seed ?? Math.floor(Math.random() * 1000000);
+    const url = new URL(
+      `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}`
+    );
+    url.searchParams.set("width", `${conf.width}`);
+    url.searchParams.set("height", `${conf.height}`);
+    url.searchParams.set("seed", `${seed}`);
+    url.searchParams.set("model", conf.model);
+    url.searchParams.set("nologo", conf.nologo ? "true" : "false");
+    url.searchParams.set("enhance", conf.enhance ? "true" : "false");
+    url.searchParams.set("safe", conf.safe ? "true" : "false");
+    url.searchParams.set("private", conf.private ? "true" : "false");
+    try {
+      await preloadImage(url.toString());
+    } catch (e) {
+      console.error(e);
+    }
+
+    return {
+      value: "",
+      data: [
+        {
+          type: "image",
+          src: url.toString(),
+          seed,
+          width: 1024,
+          height: 1024,
+          model: "flux",
+          description: prompt,
+        },
+      ],
+    };
+  },
+  async instruction({ shape, editor }) {
+    const inputs = getInputs(editor, shape);
+    const value = shape.props.value;
+    if (!value)
+      return {
+        data: [],
+      };
+    const seed = Math.floor(Math.random() * 1000000);
+    const markdown = await textGeneration({
+      value,
+      inputs,
+      seed,
+    });
+    const html = await marked.parse(markdown);
+    const text = DOMPurify.sanitize(html);
+    console.log(text);
     return {
       data: [
         {
           type: "text",
-          text: interpolate(shape.props.value, ins),
+          text,
+          seed,
         },
       ],
+    };
+  },
+  command({ shape }) {
+    return {
+      value: shape.props.value,
+      data: [],
     };
   },
   button() {

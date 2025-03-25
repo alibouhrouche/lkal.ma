@@ -1,5 +1,7 @@
 import { EditorView } from "@tiptap/pm/view";
 import Document from "@tiptap/extension-document";
+import ListItem from "@tiptap/extension-list-item";
+import OrderedList from "@tiptap/extension-ordered-list";
 import History from "@tiptap/extension-history";
 import Paragraph from "@tiptap/extension-paragraph";
 import Text from "@tiptap/extension-text";
@@ -9,8 +11,18 @@ import {
   useEditor as useHTMLEditor,
 } from "@tiptap/react";
 import React, { useCallback, useEffect } from "react";
-import { Editor, TEXT_PROPS, TLDefaultSizeStyle, useEditor } from "tldraw";
+import {
+  Editor,
+  preventDefault,
+  stopEventPropagation,
+  TEXT_PROPS,
+  TLDefaultSizeStyle,
+  useEditor,
+} from "tldraw";
 import { ComponentShape } from ".";
+import CommandContent from "./commands";
+import { Label } from "../ui/label";
+import ImageContent from "./image";
 
 const FONT_SIZES: Record<TLDefaultSizeStyle, number> = {
   s: 12,
@@ -18,10 +30,6 @@ const FONT_SIZES: Record<TLDefaultSizeStyle, number> = {
   l: 22,
   xl: 38,
 };
-
-const preventDefault = (event: React.DragEvent) => event.preventDefault();
-const stopEventPropagation = (event: React.BaseSyntheticEvent) =>
-  event.stopPropagation();
 
 // Prevent exiting the editor when hitting Tab.
 // Also, insert a tab character at the front of the line if the shift key isn't pressed,
@@ -113,19 +121,19 @@ export const EditableContent = React.memo(function Content({
   );
 
   const onKeyDown = useCallback(
-		(view: EditorView, event: KeyboardEvent) => {
-			if (event.key === 'Tab') {
-				handleTab(editor, view, event)
-			} else if (event.key === 'Enter' && event.ctrlKey) {
-        event.preventDefault()
-        onRun?.()
+    (view: EditorView, event: KeyboardEvent) => {
+      if (event.key === "Tab") {
+        handleTab(editor, view, event);
+      } else if (event.key === "Enter" && event.ctrlKey) {
+        event.preventDefault();
+        onRun?.();
       }
-		},
-		[editor, onRun]
-	)
+    },
+    [editor, onRun]
+  );
 
   const htmlEditor = useHTMLEditor({
-    extensions: [Document, Paragraph, Text, History],
+    extensions: [Document, Paragraph, Text, History, OrderedList, ListItem],
     content: shape.props.value,
     onUpdate: handleUpdate,
     editorProps: {
@@ -153,7 +161,7 @@ export const EditableContent = React.memo(function Content({
 
   return (
     <div
-      className="w-full h-full p-2 overflow-y-scroll overflow-x-hidden tl-text-wrapper"
+      className="prose dark:prose-invert max-w-none w-full h-full p-2 overflow-y-scroll overflow-x-hidden tl-text-wrapper"
       data-font={shape.props.font}
       style={{
         fontSize,
@@ -180,19 +188,34 @@ export const EditableContent = React.memo(function Content({
   );
 });
 
-export default function Content({
+export default React.memo(function Content({
   shape,
   loading,
+  canEdit,
+  isEditing,
   onRun,
 }: {
   shape: ComponentShape;
   loading?: boolean;
+  canEdit?: boolean;
+  isEditing?: boolean;
   onRun?: () => void;
 }) {
   switch (shape.props.component) {
     case "text":
-      return <EditableContent shape={shape} editable={!loading} onRun={onRun} />;
+    case "instruction":
+      return (
+        <EditableContent
+          shape={shape}
+          editable={!loading && canEdit}
+          onRun={onRun}
+        />
+      );
+    case "image":
+      return <ImageContent shape={shape} isEditing={isEditing} />;
+    case "command":
+      return <CommandContent shape={shape} canEdit={canEdit} />;
     default:
       return null;
   }
-}
+});

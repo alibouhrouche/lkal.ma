@@ -19,7 +19,7 @@ import {
 import { GripVerticalIcon, Loader2, Play } from "lucide-react";
 import Content from "./content";
 import { runners } from "./run";
-import { useCallback, useEffect, useState } from "react";
+import { CSSProperties, useCallback, useEffect, useState } from "react";
 import { componentRunner } from "./observer";
 import { toAdjacencyList, topologicalSort } from "./graph";
 import { ShowTime, Stopwatch } from "./stopwatch";
@@ -43,8 +43,15 @@ export class ComponentTool extends BaseBoxShapeTool {
 
 export const componentTypeStyle = StyleProp.defineEnum("component:type", {
   defaultValue: "text",
-  values: ["text", "button"], //, "instruction", "button", "website", "image"],
+  values: ["text", "instruction", "command", "button", "image"], //, "instruction", "button", "website", "image"],
 });
+
+const TimePosRight = {
+  text: "right-4",
+  instruction: "right-4",
+  image: "right-1",
+  command: "right-1",
+};
 
 export type ComponentTypeStyle = T.TypeOf<typeof componentTypeStyle>;
 
@@ -65,13 +72,40 @@ export const componentShapeProps = {
   ),
   readonly: T.boolean,
   data: T.arrayOf(
-    T.object({
-      type: T.string,
-      text: T.string,
-      description: T.optional(T.string),
-      name: T.optional(T.string),
+    T.union("type", {
+      text: T.object({
+        type: T.literal("text"),
+        text: T.string,
+        model: T.optional(T.string),
+        seed: T.optional(T.number),
+        description: T.optional(T.string),
+        name: T.optional(T.string),
+      }),
+      image: T.object({
+        type: T.literal("image"),
+        src: T.string,
+        height: T.number,
+        width: T.number,
+        seed: T.optional(T.number),
+        model: T.optional(T.string),
+        description: T.optional(T.string),
+        name: T.optional(T.string),
+      }),
     })
   ),
+  config: T.optional(T.union("type", {
+    image: T.object({
+      type: T.literal("image"),
+      model: T.string,
+      seed: T.nullable(T.number),
+      width: T.number,
+      height: T.number,
+      nologo: T.boolean,
+      private: T.boolean,
+      enhance: T.boolean,
+      safe: T.boolean,
+    }),
+  })),
   scale: T.number,
   font: DefaultFontStyle,
   size: DefaultSizeStyle,
@@ -89,10 +123,10 @@ export class ComponentUtil extends ShapeUtil<ComponentShape> {
     return false;
   }
   override canResize() {
-    return true;
+    return this.editor.getIsReadonly() === false;
   }
   override canEdit() {
-    return true;
+    return this.editor.getIsReadonly() === false;
   }
   getDefaultProps(): ComponentShapeProps {
     return {
@@ -100,7 +134,7 @@ export class ComponentUtil extends ShapeUtil<ComponentShape> {
       color: "light-violet",
       w: 100,
       h: 50,
-      value: "Component",
+      value: "",
       procedure: null,
       readonly: false,
       data: [],
@@ -137,6 +171,9 @@ export class ComponentUtil extends ShapeUtil<ComponentShape> {
 
     const componentType = shape.props.component;
 
+    const canEdit = this.canEdit();
+    const isEditing = this.editor.getEditingShapeId() === shape.id;
+
     if (componentType === "button") {
       const min = Math.min(shape.props.w, shape.props.h);
       return (
@@ -147,7 +184,7 @@ export class ComponentUtil extends ShapeUtil<ComponentShape> {
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
-            pointerEvents: "all",
+            pointerEvents: canEdit ? "all" : "none",
             color: theme[shape.props.color].solid,
           }}
         >
@@ -162,8 +199,9 @@ export class ComponentUtil extends ShapeUtil<ComponentShape> {
           >
             <button
               className="tl-cursor-pointer p-2"
-              disabled={loading !== false}
+              disabled={loading !== false || canEdit === false}
               onPointerDown={(e) => {
+                if (canEdit === false) return;
                 e.stopPropagation();
                 run();
               }}
@@ -190,12 +228,14 @@ export class ComponentUtil extends ShapeUtil<ComponentShape> {
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "left",
-          pointerEvents: "all",
+          pointerEvents: canEdit ? "all" : "none",
           position: "relative",
           backgroundColor: theme[shape.props.color].semi,
           color: theme[shape.props.color].solid,
+          "--bg": theme[shape.props.color].semi,
+          "--fg": theme[shape.props.color].solid,
           borderRadius: "calc(var(--radius)",
-        }}
+        } as CSSProperties}
       >
         <div className="flex items-center justify-between w-full p-2 rounded-t-sm tl-cursor">
           <div className="flex items-center gap-1">
@@ -207,12 +247,13 @@ export class ComponentUtil extends ShapeUtil<ComponentShape> {
           <div
             className="flex items-center gap-2"
             onPointerDown={(e) => {
+              if (canEdit === false) return;
               e.stopPropagation();
             }}
           >
             <button
               className="tl-cursor-pointer hover:opacity-75"
-              disabled={loading !== false}
+              disabled={loading !== false || canEdit === false}
               onPointerDown={run}
             >
               {loading ? (
@@ -226,15 +267,25 @@ export class ComponentUtil extends ShapeUtil<ComponentShape> {
         <div
           className="w-full h-full overflow-hidden"
           style={{
-            borderRadius: "calc(var(--radius)",
+            borderBottomLeftRadius: "calc(var(--radius)",
+            borderBottomRightRadius: "calc(var(--radius)",
           }}
         >
-          <Content shape={shape} loading={loading !== false} onRun={run} />
+          <Content
+            shape={shape}
+            loading={loading !== false}
+            canEdit={canEdit}
+            isEditing={isEditing}
+            onRun={run}
+          />
         </div>
         {loading !== false ? (
-          <Stopwatch start={loading} />
+          <Stopwatch className={TimePosRight[componentType]} start={loading} />
         ) : (
-          <ShowTime time={shape.props.time ?? 0} />
+          <ShowTime
+            className={TimePosRight[componentType]}
+            time={shape.props.time ?? 0}
+          />
         )}
       </HTMLContainer>
     );
@@ -246,6 +297,7 @@ export class ComponentUtil extends ShapeUtil<ComponentShape> {
     return resizeBox(shape, info);
   }
   async run(shape: ComponentShape, signal?: AbortSignal) {
+    if (!this.canEdit()) return;
     const namesMap = new Map<TLShapeId, (string | undefined)[]>();
     const adj = toAdjacencyList(this.editor, shape.id, namesMap);
     const order = topologicalSort(adj).map(
@@ -276,4 +328,17 @@ export class ComponentUtil extends ShapeUtil<ComponentShape> {
       }
     }
   }
+  // toSvg(shape: ComponentShape, ctx: SvgExportContext) {
+  //   return null;
+  //     // if (shape.props.component === "button" || shape.props.component === "text") {
+  //     //   return this.component(shape);
+  //     // }
+  //     // return this.component({
+  //     //   ...shape,
+  //     //   props: {
+  //     //     ...shape.props,
+  //     //     data: [],
+  //     //   },
+  //     // });
+  // }
 }

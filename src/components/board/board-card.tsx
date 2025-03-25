@@ -6,6 +6,7 @@ import { ask } from "../prompts";
 import { Board, db } from "@/db";
 import { PencilIcon, Trash2Icon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useObservable } from "dexie-react-hooks";
 
 export default function BoardCard({
   board,
@@ -16,9 +17,18 @@ export default function BoardCard({
   currentBoardId?: string;
   classname?: string;
 }) {
+  const can = useObservable(
+    () => db.cloud.permissions(board, "boards"),
+    [board]
+  );
+  const canEditBoardName = can?.update("name");
+  const canDeleteBoard = can?.delete();
   return (
     <div
-      className={cn("cursor-pointer data-[active=true]:bg-primary hover:bg-primary/50 rounded-xl", classname)}
+      className={cn(
+        "cursor-pointer data-[active=true]:bg-primary hover:bg-primary/50 rounded-xl",
+        classname
+      )}
       data-active={board.id === currentBoardId}
     >
       <AspectRatio
@@ -29,12 +39,16 @@ export default function BoardCard({
           <>
             <img
               className="object-fit h-full w-full p-2 bg-[#f9fafb] dark:hidden"
-              src={`data:image/svg+xml,${encodeURIComponent(board.thumbnail[0])}`}
+              src={`data:image/svg+xml,${encodeURIComponent(
+                board.thumbnail[0]
+              )}`}
               alt={`Thumbnail for board "${board.name}"`}
             />
             <img
               className="object-fit h-full w-full p-2 bg-[#101011] hidden dark:block"
-              src={`data:image/svg+xml,${encodeURIComponent(board.thumbnail[1])}`}
+              src={`data:image/svg+xml,${encodeURIComponent(
+                board.thumbnail[1]
+              )}`}
               alt={`Thumbnail for board "${board.name}"`}
             />
           </>
@@ -59,28 +73,38 @@ export default function BoardCard({
               <div>{board.name} </div>
             )}
             <div className="space-x-2">
-              <Button
-                size="icon"
-                variant="ghost"
-                className="size-6 cursor-pointer"
-                onClick={() => {
-                  ask({
-                    type: "prompt",
-                    title: "Rename Board",
-                    message: `Enter a new name for the board "${board.name}"`,
-                    label: "Name",
-                    default: board.name,
-                    placeholder: "Enter a name",
-                    callback: (name) => {
-                      if (name) {
-                        db.boards.update(board.id, { name });
-                      }
-                    },
-                  });
-                }}
-              >
-                <PencilIcon />
-              </Button>
+              {canEditBoardName && (
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="size-6 cursor-pointer"
+                  onClick={() => {
+                    ask({
+                      type: "prompt",
+                      title: "Rename Board",
+                      message: `Enter a new name for the board "${board.name}"`,
+                      label: "Name",
+                      default: board.name,
+                      placeholder: "Enter a name",
+                      callback: (name) => {
+                        if (name) {
+                          db.transaction(
+                            "rw",
+                            db.realms,
+                            db.boards,
+                            async () => {
+                              db.boards.update(board.id, { name });
+                              db.realms.update(board.realmId!, { name });
+                            }
+                          );
+                        }
+                      },
+                    });
+                  }}
+                >
+                  <PencilIcon />
+                </Button>
+              )}
               <Button
                 size="icon"
                 variant="ghost"
@@ -93,7 +117,25 @@ export default function BoardCard({
                     destructive: true,
                     callback: (result) => {
                       if (result) {
-                        db.boards.delete(board.id);
+                        const user = db.cloud.currentUser?.value;
+                        if (!canDeleteBoard) {
+                          if (!user.email || !board.realmId) return;
+                          db.members.where('[email+realmId]')
+                          .equals([user.email, board.realmId])
+                          .delete()
+                          return;
+                        }
+                        db.transaction("rw", db.realms, db.boards, async () => {
+                          return db.transaction(
+                            "rw",
+                            db.boards,
+                            db.realms,
+                            async () => {
+                              db.boards.delete(board.id);
+                              db.realms.delete(board.realmId!);
+                            }
+                          );
+                        });
                       }
                     },
                   });

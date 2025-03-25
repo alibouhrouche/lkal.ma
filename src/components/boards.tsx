@@ -182,11 +182,21 @@ function AddBoardToCollection({
               type="submit"
               disabled={!selectedCollection}
               onClick={() => {
-                const updated = selectedBoards.map((id) => ({
-                  key: id,
-                  changes: { spaceId: selectedCollection },
-                }));
-                db.boards.bulkUpdate(updated);
+                db.transaction("rw", db.spaces, db.boards, async () => {
+                  const boards = (await db.spaces.get(selectedCollection!))?.boards ?? [];
+                  const filter = boards.filter((id) => !selectedBoards.includes(id));
+                  db.spaces.update(selectedCollection!, {
+                    boards: [...filter, ...selectedBoards],
+                  });
+                });
+                // db.spaces.update(selectedCollection!, {
+                //   boards: selectedBoards,
+                // });
+                // const updated = selectedBoards.map((id) => ({
+                //   key: id,
+                //   changes: { spaceId: selectedCollection },
+                // }));
+                // db.boards.bulkUpdate(updated);
                 setSelectedBoards([]);
               }}
             >
@@ -232,11 +242,21 @@ function BoardsCollections({
               destructive: true,
               callback: (confirmed) => {
                 if (confirmed) {
-                  db.boards.bulkUpdate(
-                    selectedBoards.map((id) => ({
-                      key: id,
-                      changes: { spaceId: "" },
-                    }))
+                  db.spaces.bulkUpdate(
+                    collections
+                      ?.filter((collection) =>
+                        selectedCollectionsIds.includes(collection.id)
+                      )
+                      .map((collection) => {
+                        return {
+                          key: collection.id,
+                          changes: {
+                            boards: collection.boards?.filter(
+                              (id) => !selectedBoards.includes(id)
+                            ),
+                          },
+                        };
+                      }) ?? []
                   );
                   setSelectedBoards([]);
                 }
@@ -290,19 +310,25 @@ function BoardsGrid() {
     () => db.boards.orderBy("created_at").reverse().toArray(),
     []
   );
+  const selectedCollections = useLiveQuery(
+    () => db.spaces.where("id").anyOf(selectedCollectionsIds).toArray(),
+    [selectedCollectionsIds]
+  );
   const data = useMemo(() => {
     if (!boards) {
       return [];
     }
-    const ret =
-      selectedCollectionsIds.length === 0
-        ? boards
-        : boards.filter(
-            (board) =>
-              board.spaceId && selectedCollectionsIds.includes(board.spaceId)
-          );
+    if (!selectedCollections || selectedCollections.length === 0) {
+      return [{} as Board, ...boards];
+    }
+    const boardsIds = selectedCollections.flatMap((collection) =>
+      collection.boards ?? []
+    );
+    const ret = boards.filter((board) => {
+      return boardsIds.includes(board.id);
+    });
     return [{} as Board, ...ret];
-  }, [selectedCollectionsIds, boards]);
+  }, [selectedCollections, boards]);
   return (
     <>
       <title>{`Boards - Lkal.ma`}</title>

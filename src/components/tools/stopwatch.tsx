@@ -1,9 +1,19 @@
+import { cn } from "@/lib/utils";
 import { useEffect, useRef } from "react";
 
-export function ShowTime({ time }: { time: number }) {
+export function ShowTime({
+  time,
+  className,
+}: {
+  time: number;
+  className?: string;
+}) {
   return (
     <div
-      className="tl-text-wrapper absolute bottom-0 right-4 opacity-60"
+      className={cn(
+        "tl-text-wrapper absolute bottom-0 right-0 opacity-60",
+        className
+      )}
       data-font="draw"
     >
       {(time / 1000).toFixed(2)}s
@@ -11,7 +21,13 @@ export function ShowTime({ time }: { time: number }) {
   );
 }
 
-export function Stopwatch({ start: _start }: { start: number }) {
+export function Stopwatch({
+  start: _start,
+  className,
+}: {
+  start: number;
+  className?: string;
+}) {
   const ref = useRef<HTMLDivElement>(null);
   const start = useRef(_start);
   useEffect(() => {
@@ -31,7 +47,10 @@ export function Stopwatch({ start: _start }: { start: number }) {
   return (
     <div
       ref={ref}
-      className="tl-text-wrapper absolute bottom-0 right-4 opacity-60"
+      className={cn(
+        "tl-text-wrapper absolute bottom-0 right-0 opacity-60",
+        className
+      )}
       data-font="draw"
     >
       0.00s

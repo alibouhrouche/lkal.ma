@@ -1,6 +1,6 @@
 import Dexie, { type EntityTable } from "dexie";
 // import 'dexie-observable';
-import dexieCloud, { UserLogin } from "dexie-cloud-addon";
+import dexieCloud, { DBRealmMember, UserLogin } from "dexie-cloud-addon";
 import * as Y from "yjs";
 import * as awarenessProtocol from "y-protocols/awareness";
 import { customAlphabet } from "nanoid";
@@ -25,8 +25,7 @@ export interface ISpace {
   id: string;
   title: string;
   created_at: Date;
-  realmId?: string;
-  owner?: string;
+  boards?: string[];
 }
 
 class DB extends Dexie {
@@ -35,7 +34,7 @@ class DB extends Dexie {
   constructor() {
     super("boards", { Y, addons: [dexieCloud] });
     this.version(1).stores({
-      boards: "id,name,created_at,updated_at,realmId,doc:Y,spaceId",
+      boards: "id,name,created_at,updated_at,realmId,doc:Y",
       spaces: "id,title",
       realms: "@realmId",
       members: "@id,[realmId+email]",
@@ -50,22 +49,49 @@ class DB extends Dexie {
       tryUseServiceWorker: true,
       periodicSync: {
         minInterval: 1 * 60 * 60 * 1000,
-      }
+      },
     });
-    // this.cloud.sync();
+    this.cloud.sync();
   }
   getBoard(id: string) {
     return this.boards.get(id);
   }
-  async newBoard() {
-    const id = nanoid();
-    const now = new Date();
-    return await this.boards.add({
-      id,
-      name: "New Board",
-      created_at: now,
-      updated_at: now,
+  newBoard() {
+    return this.transaction("rw", db.realms, db.boards, async () => {
+      const id = nanoid();
+      const now = new Date();
+      // Create a new realm
+      const newRealmId = await db.realms.add({
+        name: `New Board`,
+        represents: `a board`,
+      });
+      // Create board and put it in the new realm.
+      return await this.boards.add({
+        id,
+        name: "New Board",
+        created_at: now,
+        updated_at: now,
+        realmId: newRealmId,
+      });
     });
+  }
+  async addMember(board: Board, email: string, role: string) {
+    const exist = await this.members.get({ realmId: board.realmId!, email });
+    if (exist) {
+      return this.members.update(exist.id, { roles: [role] });
+    }
+    return this.members.add({
+      realmId: board.realmId!,
+      email,
+      roles: [role],
+      invite: true,
+    });
+  }
+  async deleteMember(member: DBRealmMember) {
+    return this.members.delete(member.id);
+  }
+  async updateBoard(member: DBRealmMember, role: string) {
+    return this.members.update(member.id, { roles: [role] });
   }
   async newSpace(title: string) {
     const id = nanoid();
