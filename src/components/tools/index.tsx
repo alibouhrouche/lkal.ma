@@ -5,14 +5,18 @@ import {
   DefaultSizeStyle,
   Geometry2d,
   getDefaultColorTheme,
+  getFontsFromRichText,
   HTMLContainer,
   RecordPropsType,
   Rectangle2d,
+  renderRichTextFromHTML,
   resizeBox,
   ShapeUtil,
   StyleProp,
+  SvgExportContext,
   T,
   TLBaseShape,
+  TLFontFace,
   TLResizeInfo,
   TLShapeId,
 } from "tldraw";
@@ -23,6 +27,9 @@ import { CSSProperties, useCallback, useEffect, useState } from "react";
 import { componentRunner } from "./observer";
 import { toAdjacencyList, topologicalSort } from "./graph";
 import { ShowTime, Stopwatch } from "./stopwatch";
+import Config from "./config";
+import { buttonSVG, imageSVG, textSVG } from "./svg";
+import DownloadButton from "./download";
 
 const ICON_SIZES = {
   s: 16,
@@ -35,25 +42,54 @@ export class ComponentTool extends BaseBoxShapeTool {
   static override id = "component";
   static override initial = "idle";
   override shapeType = "component";
-  // override onDoubleClick(_info: TLClickEventInfo) {
-  //   // you can handle events in handlers like this one;
-  //   // check the BaseBoxShapeTool source as an example
-  // }
 }
 
 export const componentTypeStyle = StyleProp.defineEnum("component:type", {
   defaultValue: "text",
-  values: ["text", "instruction", "command", "button", "image"], //, "instruction", "button", "website", "image"],
+  values: ["text", "instruction", "button"/*, "website"*/, "image"],
 });
 
 const TimePosRight = {
   text: "right-4",
   instruction: "right-4",
   image: "right-1",
-  command: "right-1",
+  website: "right-4",
 };
 
+// const minSizes = {
+//   text: { w: 250, h: 150 },
+//   instruction: { w: 250, h: 150 },
+//   image: { w: 350, h: 380 },
+//   command: { w: 250, h: 150 },
+//   button: { w: 50, h: 50 },
+// };
+
 export type ComponentTypeStyle = T.TypeOf<typeof componentTypeStyle>;
+
+export const ComponentConfigs = {
+  image: T.object({
+    type: T.literal("image"),
+    model: T.string,
+    seed: T.nullable(T.number),
+    width: T.number,
+    height: T.number,
+    nologo: T.boolean,
+    private: T.boolean,
+    enhance: T.boolean,
+    safe: T.boolean,
+  }),
+  text: T.object({
+    type: T.literal("text"),
+    model: T.string,
+    seed: T.nullable(T.number),
+    json: T.boolean,
+    private: T.boolean,
+  }),
+};
+
+export type ComponentConfigImage = T.TypeOf<typeof ComponentConfigs.image>;
+export type ComponentConfigText = T.TypeOf<typeof ComponentConfigs.text>;
+export type ComponentConfig = ComponentConfigImage | ComponentConfigText;
 
 export const componentShapeProps = {
   component: componentTypeStyle,
@@ -93,19 +129,7 @@ export const componentShapeProps = {
       }),
     })
   ),
-  config: T.optional(T.union("type", {
-    image: T.object({
-      type: T.literal("image"),
-      model: T.string,
-      seed: T.nullable(T.number),
-      width: T.number,
-      height: T.number,
-      nologo: T.boolean,
-      private: T.boolean,
-      enhance: T.boolean,
-      safe: T.boolean,
-    }),
-  })),
+  config: T.optional(T.union("type", ComponentConfigs)),
   scale: T.number,
   font: DefaultFontStyle,
   size: DefaultSizeStyle,
@@ -127,6 +151,17 @@ export class ComponentUtil extends ShapeUtil<ComponentShape> {
   }
   override canEdit() {
     return this.editor.getIsReadonly() === false;
+  }
+  override getFontFaces(shape: ComponentShape): TLFontFace[] {
+    if (["text", "instructions"].includes(shape.props.component)) {
+      const richText = renderRichTextFromHTML(this.editor, shape.props.value);
+      return getFontsFromRichText(this.editor, richText, {
+        family: `tldraw_${shape.props.font}`,
+        weight: "normal",
+        style: "normal",
+      });
+    }
+    return [];
   }
   getDefaultProps(): ComponentShapeProps {
     return {
@@ -158,16 +193,23 @@ export class ComponentUtil extends ShapeUtil<ComponentShape> {
     // eslint-disable-next-line react-hooks/rules-of-hooks
     const [loading, setLoading] = useState<number | false>(false);
     // eslint-disable-next-line react-hooks/rules-of-hooks
+    const [abort, setAbort] = useState<AbortController | null>(null);
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     useEffect(() => {
       return componentRunner.subscribe(shape.id, (data) => {
         setLoading(data.loading);
+        setAbort(data.abort ?? null);
       });
     }, [shape.id]);
 
     // eslint-disable-next-line react-hooks/rules-of-hooks
     const run = useCallback(() => {
+      if (loading !== false) {
+        abort?.abort();
+        return;
+      }
       this.run(shape);
-    }, [shape]);
+    }, [shape, loading, abort]);
 
     const componentType = shape.props.component;
 
@@ -199,7 +241,6 @@ export class ComponentUtil extends ShapeUtil<ComponentShape> {
           >
             <button
               className="tl-cursor-pointer p-2"
-              disabled={loading !== false || canEdit === false}
               onPointerDown={(e) => {
                 if (canEdit === false) return;
                 e.stopPropagation();
@@ -223,19 +264,21 @@ export class ComponentUtil extends ShapeUtil<ComponentShape> {
     return (
       <HTMLContainer
         id={shape.id}
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "left",
-          pointerEvents: canEdit ? "all" : "none",
-          position: "relative",
-          backgroundColor: theme[shape.props.color].semi,
-          color: theme[shape.props.color].solid,
-          "--bg": theme[shape.props.color].semi,
-          "--fg": theme[shape.props.color].solid,
-          borderRadius: "calc(var(--radius)",
-        } as CSSProperties}
+        style={
+          {
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "left",
+            pointerEvents: canEdit ? "all" : "none",
+            position: "relative",
+            backgroundColor: theme[shape.props.color].semi,
+            color: theme[shape.props.color].solid,
+            "--bg": theme[shape.props.color].semi,
+            "--fg": theme[shape.props.color].solid,
+            borderRadius: "calc(var(--radius)",
+          } as CSSProperties
+        }
       >
         <div className="flex items-center justify-between w-full p-2 rounded-t-sm tl-cursor">
           <div className="flex items-center gap-1">
@@ -251,6 +294,13 @@ export class ComponentUtil extends ShapeUtil<ComponentShape> {
               e.stopPropagation();
             }}
           >
+            <DownloadButton shape={shape} />
+            <Config
+              editor={this.editor}
+              shape={shape}
+              canEdit={canEdit}
+              loading={loading}
+            />
             <button
               className="tl-cursor-pointer hover:opacity-75"
               disabled={loading !== false || canEdit === false}
@@ -296,7 +346,9 @@ export class ComponentUtil extends ShapeUtil<ComponentShape> {
   override onResize(shape: ComponentShape, info: TLResizeInfo<ComponentShape>) {
     return resizeBox(shape, info);
   }
-  async run(shape: ComponentShape, signal?: AbortSignal) {
+  async run(shape: ComponentShape) {
+    const abort = new AbortController();
+    const signal = abort.signal;
     if (!this.canEdit()) return;
     const namesMap = new Map<TLShapeId, (string | undefined)[]>();
     const adj = toAdjacencyList(this.editor, shape.id, namesMap);
@@ -304,10 +356,10 @@ export class ComponentUtil extends ShapeUtil<ComponentShape> {
       (id) => this.editor.getShape(id)! as ComponentShape
     );
     for (const shape of order) {
+      const start = performance.now();
+      componentRunner.notify({ id: shape.id, loading: start, abort });
+      signal?.throwIfAborted();
       try {
-        const start = performance.now();
-        componentRunner.notify({ id: shape.id, loading: start });
-        signal?.throwIfAborted();
         const props = await runners[shape.props.component]({
           editor: this.editor,
           shape,
@@ -328,17 +380,17 @@ export class ComponentUtil extends ShapeUtil<ComponentShape> {
       }
     }
   }
-  // toSvg(shape: ComponentShape, ctx: SvgExportContext) {
-  //   return null;
-  //     // if (shape.props.component === "button" || shape.props.component === "text") {
-  //     //   return this.component(shape);
-  //     // }
-  //     // return this.component({
-  //     //   ...shape,
-  //     //   props: {
-  //     //     ...shape.props,
-  //     //     data: [],
-  //     //   },
-  //     // });
-  // }
+  override async toSvg(shape: ComponentShape, ctx: SvgExportContext) {
+    switch (shape.props.component) {
+      case "image":
+        return imageSVG({ editor: this.editor, shape, ctx });
+      case "text":
+      case "instruction":
+        return textSVG({ editor: this.editor, shape, ctx });
+      case "button":
+        return buttonSVG({ editor: this.editor, shape, ctx });
+      default:
+        return null;
+    }
+  }
 }

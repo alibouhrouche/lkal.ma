@@ -1,5 +1,3 @@
-/* eslint-disable @next/next/no-img-element */ // For data URLs SVGs
-import { Link } from "react-router";
 import { AspectRatio } from "../ui/aspect-ratio";
 import { Button } from "../ui/button";
 import { ask } from "../prompts";
@@ -7,8 +5,10 @@ import { Board, db } from "@/db";
 import { PencilIcon, Trash2Icon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useObservable } from "dexie-react-hooks";
+import LinkComp from "./LinkComp";
+import React from "react";
 
-export default function BoardCard({
+const BoardCard = React.memo(function BoardCard({
   board,
   currentBoardId,
   classname,
@@ -35,20 +35,18 @@ export default function BoardCard({
         ratio={16 / 9}
         className="relative rounded-lg overflow-hidden m-1"
       >
-        {board.thumbnail ? (
+        {board.thumbnail &&
+        board.thumbnail[0].startsWith("data:") &&
+        board.thumbnail[1].startsWith("data:") ? (
           <>
             <img
               className="object-fit h-full w-full p-2 bg-[#f9fafb] dark:hidden"
-              src={`data:image/svg+xml,${encodeURIComponent(
-                board.thumbnail[0]
-              )}`}
+              src={board.thumbnail[0]}
               alt={`Thumbnail for board "${board.name}"`}
             />
             <img
               className="object-fit h-full w-full p-2 bg-[#101011] hidden dark:block"
-              src={`data:image/svg+xml,${encodeURIComponent(
-                board.thumbnail[1]
-              )}`}
+              src={board.thumbnail[1]}
               alt={`Thumbnail for board "${board.name}"`}
             />
           </>
@@ -56,8 +54,8 @@ export default function BoardCard({
           <div className="absolute bg-[#f9fafb] dark:bg-[#101011] h-full w-full" />
         )}
         {currentBoardId !== board.id ? (
-          <Link
-            to={`/b/${board.id}`}
+          <LinkComp
+            href={`/b/${board.id}`}
             className="absolute inset-0 bg-gradient-to-t from-white dark:from-black from-10% to-50%"
           />
         ) : (
@@ -66,9 +64,9 @@ export default function BoardCard({
         <div className="absolute bottom-0 w-full px-2">
           <div className="text-black dark:text-white flex gap-2 items-center justify-between bg-opacity-50 p-1 text-xs">
             {currentBoardId !== board.id ? (
-              <Link to={`/b/${board.id}`} className="flex-1">
+              <LinkComp href={`/b/${board.id}`} className="flex-1">
                 {board.name}
-              </Link>
+              </LinkComp>
             ) : (
               <div>{board.name} </div>
             )}
@@ -120,9 +118,10 @@ export default function BoardCard({
                         const user = db.cloud.currentUser?.value;
                         if (!canDeleteBoard) {
                           if (!user.email || !board.realmId) return;
-                          db.members.where('[email+realmId]')
-                          .equals([user.email, board.realmId])
-                          .delete()
+                          db.members
+                            .where("[email+realmId]")
+                            .equals([user.email, board.realmId])
+                            .delete();
                           return;
                         }
                         db.transaction("rw", db.realms, db.boards, async () => {
@@ -149,4 +148,6 @@ export default function BoardCard({
       </AspectRatio>
     </div>
   );
-}
+});
+
+export default BoardCard;

@@ -1,0 +1,20 @@
+---
+import { StatusIcon } from "@/components/status";
+import Navbar from "@/components/navbar/navbar.astro";
+import FAQ from "@/components/sections/faq";
+import Features from "@/components/sections/features";
+import Footer from "@/components/sections/footer";
+import Hero from "@/components/sections/hero.astro";
+import Layout from "@/layouts/Layout.astro";
+---
+
+<Layout title="Whiteboarding Without Limits">
+  <Navbar />
+  <Hero />
+  <Features />
+  <FAQ client:load />
+  <Footer />
+  <div class="fixed bottom-0 right-0 opacity-50">
+    <StatusIcon client:only />
+  </div>
+</Layout>

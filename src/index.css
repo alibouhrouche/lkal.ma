@@ -126,27 +126,54 @@
   body {
     @apply bg-background text-foreground;
   }
-  .pointer-events-all {
-    pointer-events: all;
-  }
-  .tl-cursor-pointer {
-    cursor: var(--tl-cursor-pointer);
-  }
-  .tl-cursor {
-    cursor: var(--tl-cursor);
-  }
+}
+
+.app * {
+  border: unset;
+}
+
+.text-fg {
+  color: var(--fg);
+  --tw-prose-body: var(--fg);
+  --tw-prose-headings: var(--fg);
+  --tw-prose-lead: var(--fg);
+  --tw-prose-links: var(--fg);
+  --tw-prose-bold: var(--fg);
+  --tw-prose-counters: var(--fg);
+  --tw-prose-bullets: var(--fg);
+  --tw-prose-hr: var(--fg);
+  --tw-prose-quotes: var(--fg);
+  --tw-prose-quote-borders: var(--fg);
+  --tw-prose-captions: var(--fg);
+  --tw-prose-kbd: var(--fg);
+  --tw-prose-kbd-shadows: var(--fg);
+  --tw-prose-code: var(--fg);
+  --tw-prose-pre-code: var(--fg);
+  --tw-prose-pre-bg: var(--fg);
+  --tw-prose-th-borders: var(--fg);
+  --tw-prose-td-borders: var(--fg);
 }
 
 body,
 html {
+  height: 100%;
   width: 100%;
   margin: 0;
 }
 
-html,
-body,
-#root {
-  height: 100%;
+.pointer-events-all {
+  pointer-events: all;
+}
+.tl-cursor-pointer {
+  cursor: pointer;
+  cursor: var(--tl-cursor-pointer, pointer);
+}
+.tl-cursor {
+  cursor: var(--tl-cursor);
+}
+
+.dark .tl-loading {
+  background-color: #101011;
 }
 
 [data-radix-popper-content-wrapper] {

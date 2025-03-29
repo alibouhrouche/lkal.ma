@@ -15,7 +15,7 @@ export default function LoginButton({children}: {children?: React.ReactNode}) {
   }
   return (
     <Button
-      className="cursor-pointer"
+      className="tl-cursor-pointer cursor-pointer"
       onClick={() => {
         db.cloud.login();
       }}

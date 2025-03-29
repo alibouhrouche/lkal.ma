@@ -5,6 +5,7 @@ type Observer<T> = (arg: T) => void;
 type ObserverData = {
   id: TLShapeId;
   loading: number | false;
+  abort?: AbortController;
 };
 
 class ComponentRunner {

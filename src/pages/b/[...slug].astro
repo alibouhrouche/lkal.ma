@@ -1,0 +1,14 @@
+---
+import BoardLayout from "@/components/board/board-layout";
+import { Loading } from "@/components/loading";
+import Layout from "@/layouts/Layout.astro";
+export async function getStaticPaths() {
+  return [{ params: { slug: undefined } }];
+}
+---
+
+<Layout title="loading...">
+  <BoardLayout client:only>
+    <Loading slot="fallback" />
+  </BoardLayout>
+</Layout>

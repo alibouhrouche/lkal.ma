@@ -19,6 +19,11 @@ const faq = [
       "You can still use lkal.ma for free, but your data won't sync across devices unless you subscribe to a Pro plan.",
   },
   {
+    question: "How does the AI generation feature work?",
+    answer:
+      "Using Pollinations.ai, you can generate images and text directly in lkal.ma, making it easy to create visuals, mind maps, or creative writing on the fly.",
+  },
+  {
     question: "Can I invite others to collaborate?",
     answer:
       "Yes! You can share a link to your board with anyone, and they can join you in real time.",
@@ -27,6 +32,11 @@ const faq = [
     question: "How does offline mode work?",
     answer:
       "Any changes you make offline are saved locally and sync automatically when you reconnect.",
+  },
+  {
+    question: "Is AI generation available offline?",
+    answer:
+      "No, AI generation requires an internet connection. However, you can still use all other features offline.",
   },
   {
     question: "What if I don't want to store my data in the cloud?",

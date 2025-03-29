@@ -2,12 +2,12 @@ import { useTheme } from "next-themes";
 import { useEffect } from "react";
 import { useEditor } from "tldraw";
 import { db } from "@/db";
-import { useParams } from "react-router";
+import { useApp } from "./context";
 
 export default function AppEvents() {
   const editor = useEditor();
   const { theme } = useTheme();
-  const id = useParams().id!;
+  const id = useApp().id;
   useEffect(() => {
     editor.user.updateUserPreferences({
       colorScheme: theme as "dark" | "light" | "system",

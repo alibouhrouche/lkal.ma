@@ -1,0 +1,12 @@
+---
+import Layout from "@/layouts/Layout.astro";
+---
+
+<Layout>
+  <script>
+    import { db } from "@/db";
+    db.newBoard().then((id) => {
+        location.replace(`/b/${id}`);
+    });
+  </script>
+</Layout>

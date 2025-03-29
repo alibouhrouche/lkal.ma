@@ -12,7 +12,6 @@ import {
 import { DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
 import { Button } from "../ui/button";
 import { logout } from "@/db/logout";
-import { Link } from "react-router";
 
 function License({ user }: { user: UserLogin }) {
   const { license } = user;
@@ -50,7 +49,7 @@ export default function NavUser({ user }: { user: UserLogin }) {
           size="icon"
           className="overflow-hidden rounded-full"
         >
-          <Avatar className="cursor-pointer">
+          <Avatar className="tl-cursor-pointer cursor-pointer">
             <AvatarImage src={avatar} alt={user.email} />
           </Avatar>
         </Button>
@@ -61,9 +60,9 @@ export default function NavUser({ user }: { user: UserLogin }) {
         <DropdownMenuLabel className="font-normal">
           <License user={user} />
         </DropdownMenuLabel>
-        <Link to="/boards">
+        <a href="/boards">
           <DropdownMenuItem>Boards</DropdownMenuItem>
-        </Link>
+        </a>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => logout()}>Logout</DropdownMenuItem>
       </DropdownMenuContent>

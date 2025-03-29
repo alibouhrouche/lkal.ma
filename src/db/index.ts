@@ -5,10 +5,14 @@ import * as Y from "yjs";
 import * as awarenessProtocol from "y-protocols/awareness";
 import { customAlphabet } from "nanoid";
 import { useObservable } from "dexie-react-hooks";
+import { FileHelpers, TLAssetId, TLAssetStore, uniqueId } from "tldraw";
 const alphabet =
   "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 const nanoid = customAlphabet(alphabet, 23);
 
+type BoardAssets = {
+  [name: string]: Blob;
+};
 export interface Board {
   id: string;
   name: string;
@@ -19,6 +23,7 @@ export interface Board {
   realmId?: string;
   owner?: string;
   spaceId?: string;
+  assets?: BoardAssets;
 }
 
 export interface ISpace {
@@ -41,7 +46,7 @@ class DB extends Dexie {
       roles: "[realmId+name]",
     });
     this.cloud.configure({
-      databaseUrl: process.env.NEXT_PUBLIC_DEXIE_CLOUD_DB_URL!,
+      databaseUrl: import.meta.env.PUBLIC_DEXIE_CLOUD_DB_URL!,
       // Enable Y.js awareness
       awarenessProtocol: awarenessProtocol,
       customLoginGui: true,
@@ -51,7 +56,6 @@ class DB extends Dexie {
         minInterval: 1 * 60 * 60 * 1000,
       },
     });
-    this.cloud.sync();
   }
   getBoard(id: string) {
     return this.boards.get(id);
@@ -114,3 +118,63 @@ export const userPromise = () =>
   });
 
 export const db = new DB();
+
+
+const boardsRegex = /^\/b\/([^/]+?)\/?$/i;
+
+export const assetsStore: TLAssetStore = {
+  upload: async (asset, file) => {
+    const id = boardsRegex.exec(location.pathname)?.[1];
+    if (!id) {
+      throw new Error("No board id found");
+    }
+    const board = await db.getBoard(id);
+    if (!board) {
+      throw new Error("No board found");
+    }
+    console.log("uploading", asset, file);
+    db.boards.update(id, {
+      assets: {
+        ...board.assets,
+        [asset.id]: file,
+      },
+    });
+    return { src: `${location.origin}/b/${id}/${asset.id}` };
+  },
+  remove: async (assets) => {
+    const id = boardsRegex.exec(location.pathname)?.[1];
+    if (!id) {
+      throw new Error("No board id found");
+    }
+    console.log("removing", assets);
+    db.boards.where("id").equals(id).modify((board) => {
+      board.assets = Object.fromEntries(
+        Object.entries(board.assets ?? {}).filter(([key]) => !assets.includes(key as TLAssetId))
+      );
+    });
+  },
+  resolve: async (asset) => {
+    // return asset.props.src;
+      const id = boardsRegex.exec(location.pathname)?.[1];
+      if (!id) {
+        throw new Error("No board id found");
+      }
+      return `${location.origin}/b/${id}/${asset.id}`;
+    // const board = await db.getBoard(id);
+    // if (!board) {
+    //   throw new Error("No board found");
+    // }
+    // const assets = board.assets;
+    // if (!assets) {
+    //   throw new Error("No assets found");
+    // }
+    // const file = assets[asset.id];
+    // if (!file) {
+    //   throw new Error("No file found");
+    // }
+    // const url = URL.createObjectURL(file);
+    // return url;
+  },
+};
+
+Reflect.set(self, "assetsStore", assetsStore);

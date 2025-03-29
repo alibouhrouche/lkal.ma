@@ -6,7 +6,7 @@
       "ES2020",
       "DOM",
       "DOM.Iterable",
-      "webworker"
+      "webworker",
     ],
     "module": "ESNext",
     "esModuleInterop": true,
@@ -16,7 +16,7 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
-    "jsx": "preserve",
+    "jsx": "react-jsx",
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
@@ -29,20 +29,23 @@
         "name": "next"
       }
     ],
+    "baseUrl": ".",
     "paths": {
       "@/*": [
         "./src/*"
       ]
     },
     "types": [
-      "@serwist/next/typings"
+      "vite-plugin-pwa/info",
+      "vite-plugin-pwa/client",
+      "vite-plugin-pwa/react",
     ],
+    "jsxImportSource": "react"
   },
   "include": [
     "./dist/types/**/*.ts",
-    "./next-env.d.ts",
+    "./env.d.ts",
     "./src",
-    ".next/types/**/*.ts"
   ],
   "exclude": [
     "./node_modules",

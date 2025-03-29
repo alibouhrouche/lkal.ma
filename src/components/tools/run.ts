@@ -1,5 +1,5 @@
 import mistql from "mistql";
-import { Editor, TLArrowBinding, TLArrowShape } from "tldraw";
+import { Editor, TLArrowBinding, TLArrowShape, TLDefaultShape } from "tldraw";
 import type {
   ComponentShape,
   ComponentTypeStyle,
@@ -9,6 +9,7 @@ import { preloadImage, textGeneration } from "./ai";
 import { marked } from "marked";
 import DOMPurify from "dompurify";
 import { defaultConfig } from "./image";
+import { getData, getInputData, getInputText } from "./shapes";
 
 type MaybePromise<T> = T | Promise<T>;
 
@@ -19,6 +20,12 @@ function interpolate(str: string, data: Record<string, string>) {
     return JSON.stringify(res, null, 2);
   });
 }
+
+// function getData(shapes: (ComponentShape | TLDefaultShape)[]) {
+//   return shapes.map((shape) => {
+//     switch
+//   });
+// }
 
 function getInputsOutputPoints(
   editor: Editor,
@@ -47,17 +54,19 @@ function getInputsOutputPoints(
         })
         .map((binding) => ({
           name: arrowText,
-          shape: editor.getShape(binding.toId) as ComponentShape,
+          shape: editor.getShape(binding.toId) as
+            | ComponentShape
+            | TLDefaultShape,
         }));
       return shapes;
     })
     .flat();
 }
 
-function getInputs(editor: Editor, shape: ComponentShape) {
+export function getInputs(editor: Editor, shape: ComponentShape) {
   return getInputsOutputPoints(editor, shape, true);
 }
-function getOutputs(editor: Editor, shape: ComponentShape) {
+export function getOutputs(editor: Editor, shape: ComponentShape) {
   return getInputsOutputPoints(editor, shape, false);
 }
 
@@ -70,7 +79,10 @@ export const runners: Record<
   }) => MaybePromise<Partial<ComponentShapeProps>>
 > = {
   text({ shape, editor }) {
-    const inputs = getInputs(editor, shape);
+    const inputs = getInputs(editor, shape) as {
+      name?: string;
+      shape: ComponentShape;
+    }[];
     const outputs = getOutputs(editor, shape);
     if (outputs.length === 0 && inputs.length === 1 && !inputs[0].name) {
       const input = inputs
@@ -130,16 +142,18 @@ export const runners: Record<
       ],
     };
   },
-  async image({ shape, editor }) {
-    const inputs = getInputs(editor, shape);
-    if (inputs.length !== 1) return {};
-    const prompt = new DOMParser().parseFromString(
-      inputs[0].shape.props.value,
-      "text/html"
-    ).body.textContent;
+  async image({ shape, editor, signal }) {
+    const { namedInputs, unnamedInputs } = getData(
+      editor,
+      shape,
+      "text/plain",
+      ["text/plain"]
+    );
+    const prompt = getInputText(namedInputs, unnamedInputs);
     if (!prompt) return {};
     const conf = shape.props.config || defaultConfig;
-    const seed = conf.seed ?? Math.floor(Math.random() * 1000000);
+    if (conf.type !== "image") return {};
+    const seed = conf.seed ?? Math.floor(Math.random() * 1000000000);
     const url = new URL(
       `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}`
     );
@@ -151,8 +165,30 @@ export const runners: Record<
     url.searchParams.set("enhance", conf.enhance ? "true" : "false");
     url.searchParams.set("safe", conf.safe ? "true" : "false");
     url.searchParams.set("private", conf.private ? "true" : "false");
+
+    // Optimistically update the shape with the new image
+    editor.updateShape({
+      id: shape.id,
+      type: "component",
+      props: {
+        ...shape.props,
+        value: "",
+        data: [
+          {
+            type: "image",
+            src: url.toString(),
+            seed,
+            width: conf.width,
+            height: conf.height,
+            model: conf.model,
+            description: prompt,
+          },
+        ],
+      },
+    });
+
     try {
-      await preloadImage(url.toString());
+      await preloadImage(url.toString(), signal);
     } catch (e) {
       console.error(e);
     }
@@ -172,22 +208,32 @@ export const runners: Record<
       ],
     };
   },
-  async instruction({ shape, editor }) {
-    const inputs = getInputs(editor, shape);
-    const value = shape.props.value;
+  async instruction({ shape, editor, signal }) {
+    const { value, config, namedInputs, unnamedInputs } = getData(
+      editor,
+      shape,
+      "text/plain",
+      ["text/html", "text/plain", "image/*"]
+    );
+    const conf = config?.type === "text" ? config : null;
     if (!value)
       return {
         data: [],
       };
     const seed = Math.floor(Math.random() * 1000000);
     const markdown = await textGeneration({
+      editor,
       value,
-      inputs,
+      model: conf?.model,
+      jsonMode: conf?.json,
+      privateMode: conf?.private,
+      namedInputs,
+      unnamedInputs,
       seed,
+      signal,
     });
     const html = await marked.parse(markdown);
     const text = DOMPurify.sanitize(html);
-    console.log(text);
     return {
       data: [
         {
@@ -198,11 +244,25 @@ export const runners: Record<
       ],
     };
   },
-  command({ shape }) {
+  debug({ shape, editor }) {
+    const {
+      namedInputs,
+      unnamedInputs,
+    } = getData(
+      editor,
+      shape,
+      "text/plain",
+      ["text/html", "text/plain", "image/*"]
+    );
+    const inputs = getInputData({
+      namedInputs,
+      unnamedInputs,
+    })
+    console.log("inputs", inputs);
     return {
-      value: shape.props.value,
-      data: [],
-    };
+      value: "",
+      data: []
+    }
   },
   button() {
     return {

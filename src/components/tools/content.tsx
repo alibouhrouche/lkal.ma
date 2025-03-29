@@ -23,8 +23,10 @@ import { ComponentShape } from ".";
 import CommandContent from "./commands";
 import { Label } from "../ui/label";
 import ImageContent from "./image";
+import { cn } from "@/lib/utils";
+import InstructionConfig from "./instructions";
 
-const FONT_SIZES: Record<TLDefaultSizeStyle, number> = {
+export const FONT_SIZES: Record<TLDefaultSizeStyle, number> = {
   s: 12,
   m: 16,
   l: 22,
@@ -157,17 +159,15 @@ export const EditableContent = React.memo(function Content({
 
   const fontSize = FONT_SIZES[shape.props.size];
   const lineHeight = TEXT_PROPS.lineHeight;
-  //   const textWidth = shape.props.w;
 
   return (
     <div
-      className="prose dark:prose-invert max-w-none w-full h-full p-2 overflow-y-scroll overflow-x-hidden tl-text-wrapper"
+      className="prose text-fg max-w-none w-full h-full p-2 overflow-y-scroll overflow-x-hidden tl-text-wrapper"
       data-font={shape.props.font}
       style={{
         fontSize,
         lineHeight: Math.floor(fontSize * lineHeight) + "px",
         minHeight: Math.floor(fontSize * lineHeight) + "px",
-        // minWidth: Math.ceil(textWidth || 0),
         cursor: "var(--tl-cursor-text)",
         ...style,
       }}
@@ -187,6 +187,29 @@ export const EditableContent = React.memo(function Content({
     </div>
   );
 });
+
+// function InstructionContent({
+//   shape,
+//   editable,
+//   isEditing,
+//   onRun,
+// }: {
+//   shape: ComponentShape;
+//   editable?: boolean;
+//   isEditing?: boolean;
+//   onRun?: () => void;
+// }) {
+//   return (
+//     <div className={cn("relative w-full h-full", isEditing && "grid grid-cols-2")}>
+//       <EditableContent
+//           shape={shape}
+//           editable={editable}
+//           onRun={onRun}
+//         />
+//       {isEditing && <InstructionConfig shape={shape} loading={false} />}
+//     </div>
+//   );
+// }
 
 export default React.memo(function Content({
   shape,
@@ -211,10 +234,10 @@ export default React.memo(function Content({
           onRun={onRun}
         />
       );
+    case "debug":
+      return <div className="w-full h-full overflow-auto p-2"><pre className="text-wrap">{shape.props.value}</pre></div>;
     case "image":
       return <ImageContent shape={shape} isEditing={isEditing} />;
-    case "command":
-      return <CommandContent shape={shape} canEdit={canEdit} />;
     default:
       return null;
   }

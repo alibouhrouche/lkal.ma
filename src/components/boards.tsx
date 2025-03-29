@@ -1,18 +1,18 @@
 import {
   DeleteIcon,
   EllipsisVerticalIcon,
+  FilePlus2Icon,
   PlusCircleIcon,
   Trash2Icon,
   XIcon,
 } from "lucide-react";
-import LoginButton from "./board/login-button";
 import { useLiveQuery } from "dexie-react-hooks";
 import { Board, db, ISpace } from "@/db";
 import BoardCard from "./board/board-card";
 import { AspectRatio } from "./ui/aspect-ratio";
-import { Link } from "react-router";
+// import { Link } from "react-router";
 import { GridComponents, VirtuosoGrid } from "react-virtuoso";
-import {
+import React, {
   Dispatch,
   forwardRef,
   HtmlHTMLAttributes,
@@ -21,10 +21,9 @@ import {
   useState,
 } from "react";
 import { Scroller } from "./ui/scroll-area";
-import { ModeToggle } from "./mode-toggle";
 import { Filters } from "./filters";
 import { Checkbox } from "./ui/checkbox";
-import { Button } from "./ui/button";
+import { Button, buttonVariants } from "./ui/button";
 import { ask } from "./prompts";
 import {
   DropdownMenu,
@@ -49,8 +48,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Logo } from "./logo";
+import { NuqsAdapter } from "nuqs/adapters/react";
 import { parseAsArrayOf, parseAsString, useQueryState } from "nuqs";
+import { Loading, Spinner } from "./loading";
 
 const List = forwardRef<HTMLDivElement, HtmlHTMLAttributes<HTMLDivElement>>(
   ({ style, children, ...props }, ref) => (
@@ -100,9 +100,15 @@ const ItemWrapper = ({
   </AspectRatio>
 );
 
-function NewBoard() {
+const newBoard = () => {
+  db.newBoard().then((id) => {
+    location.href = `/b/${id}`;
+  });
+};
+
+const NewBoard = React.memo(function NewBoard() {
   return (
-    <Link to="/b/new" className="cursor-pointer rounded-xl">
+    <div className="cursor-pointer rounded-xl" onClick={newBoard}>
       <AspectRatio
         ratio={16 / 9}
         className="p-1 hover:bg-primary/50 rounded-xl"
@@ -111,9 +117,9 @@ function NewBoard() {
           <PlusCircleIcon className="size-12" />
         </div>
       </AspectRatio>
-    </Link>
+    </div>
   );
-}
+});
 
 function AddBoardToCollection({
   collections,
@@ -183,20 +189,15 @@ function AddBoardToCollection({
               disabled={!selectedCollection}
               onClick={() => {
                 db.transaction("rw", db.spaces, db.boards, async () => {
-                  const boards = (await db.spaces.get(selectedCollection!))?.boards ?? [];
-                  const filter = boards.filter((id) => !selectedBoards.includes(id));
+                  const boards =
+                    (await db.spaces.get(selectedCollection!))?.boards ?? [];
+                  const filter = boards.filter(
+                    (id) => !selectedBoards.includes(id)
+                  );
                   db.spaces.update(selectedCollection!, {
                     boards: [...filter, ...selectedBoards],
                   });
                 });
-                // db.spaces.update(selectedCollection!, {
-                //   boards: selectedBoards,
-                // });
-                // const updated = selectedBoards.map((id) => ({
-                //   key: id,
-                //   changes: { spaceId: selectedCollection },
-                // }));
-                // db.boards.bulkUpdate(updated);
                 setSelectedBoards([]);
               }}
             >
@@ -300,6 +301,72 @@ function BoardsCollections({
   );
 }
 
+const GridItem = React.memo(function GridItem({
+  index,
+  board,
+  selectedBoards,
+  setSelectedBoards,
+}: {
+  index: number;
+  board: Board;
+  selectedBoards: string[];
+  setSelectedBoards: Dispatch<SetStateAction<string[]>>;
+}) {
+  return (
+    <ItemWrapper>
+      {index === 0 ? (
+        <NewBoard />
+      ) : (
+        <div className="relative">
+          <Checkbox
+            className="peer absolute top-0 left-0 m-2 z-10"
+            checked={selectedBoards.includes(board.id)}
+            onCheckedChange={(checked) => {
+              setSelectedBoards((prev) =>
+                checked
+                  ? [...prev, board.id]
+                  : prev.filter((id) => id !== board.id)
+              );
+            }}
+          />
+          <BoardCard
+            classname="peer-data-[state=checked]:bg-primary"
+            key={board.id}
+            board={board}
+          />
+        </div>
+      )}
+    </ItemWrapper>
+  );
+});
+
+const VirtualGrid = React.memo(function VirtualGrid({
+  data,
+  selectedBoards,
+  setSelectedBoards,
+}: {
+  data: Board[];
+  selectedBoards: string[];
+  setSelectedBoards: Dispatch<SetStateAction<string[]>>;
+}) {
+  return (
+    <VirtuosoGrid
+      style={{ height: "calc(100vh - 7rem)" }}
+      totalCount={data.length}
+      components={gridComponents}
+      data={data}
+      itemContent={(index, board) => (
+        <GridItem
+          index={index}
+          board={board}
+          selectedBoards={selectedBoards}
+          setSelectedBoards={setSelectedBoards}
+        />
+      )}
+    />
+  );
+});
+
 function BoardsGrid() {
   const [selectedCollectionsIds, setSelectedCollectionsIds] = useQueryState(
     "c",
@@ -321,8 +388,8 @@ function BoardsGrid() {
     if (!selectedCollections || selectedCollections.length === 0) {
       return [{} as Board, ...boards];
     }
-    const boardsIds = selectedCollections.flatMap((collection) =>
-      collection.boards ?? []
+    const boardsIds = selectedCollections.flatMap(
+      (collection) => collection.boards ?? []
     );
     const ret = boards.filter((board) => {
       return boardsIds.includes(board.id);
@@ -331,7 +398,6 @@ function BoardsGrid() {
   }, [selectedCollections, boards]);
   return (
     <>
-      <title>{`Boards - Lkal.ma`}</title>
       <div className="flex gap-2 px-6 py-1">
         <BoardsCollections
           selectedBoards={selectedBoards}
@@ -340,56 +406,28 @@ function BoardsGrid() {
           setSelectedCollectionsIds={setSelectedCollectionsIds}
         />
       </div>
-      <VirtuosoGrid
-        style={{ height: "calc(100vh - 7rem)" }}
-        totalCount={data.length}
-        components={gridComponents}
-        data={data}
-        itemContent={(index, board) => (
-          <ItemWrapper>
-            {index === 0 ? (
-              <NewBoard />
-            ) : (
-              <div className="relative">
-                <Checkbox
-                  className="peer absolute top-0 left-0 m-2 z-10"
-                  checked={selectedBoards.includes(board.id)}
-                  onCheckedChange={(checked) => {
-                    setSelectedBoards((prev) =>
-                      checked
-                        ? [...prev, board.id]
-                        : prev.filter((id) => id !== board.id)
-                    );
-                  }}
-                />
-                <BoardCard
-                  classname="peer-data-[state=checked]:bg-primary"
-                  key={board.id}
-                  board={board}
-                />
-              </div>
-            )}
-          </ItemWrapper>
-        )}
-      />
+      {boards ? (
+        <VirtualGrid
+          data={data}
+          selectedBoards={selectedBoards}
+          setSelectedBoards={setSelectedBoards}
+        />
+      ) : (
+        <div
+          className="w-full flex flex-col items-center justify-center"
+          style={{ height: "calc(100vh - 14rem)", marginBottom: "7rem" }}
+        >
+          <Spinner />
+        </div>
+      )}
     </>
   );
 }
 
 export default function Boards() {
   return (
-    <div>
-      <div className="w-full h-16 bg-card flex items-center p-4 justify-between">
-        <div className="flex gap-4 items-center">
-          <Logo />
-          <div className="text-2xl">Boards</div>
-        </div>
-        <div className="flex gap-4 items-center">
-          <ModeToggle />
-          <LoginButton />
-        </div>
-      </div>
+    <NuqsAdapter>
       <BoardsGrid />
-    </div>
+    </NuqsAdapter>
   );
 }

@@ -11,11 +11,10 @@ import { Scroller } from "../ui/scroll-area";
 import BoardCard from "./board-card";
 import { ArrowLeftIcon } from "lucide-react";
 import { Virtuoso } from "react-virtuoso";
-import { Link } from "react-router";
-import { useParams } from "react-router";
+import { useApp } from "./context";
 
 function BoardsList() {
-  const id = useParams().id!;
+  const id = useApp().id!;
   const boards = useLiveQuery(() =>
     db.boards.orderBy("created_at").reverse().toArray()
   );
@@ -40,12 +39,12 @@ export function AppSidebar() {
   return (
     <Sidebar>
       <SidebarHeader>
-        <Link to="/boards">
+        <a href="/boards">
           <SidebarMenuButton className="cursor-pointer">
             <ArrowLeftIcon size={24} />
             <span>See all boards</span>
           </SidebarMenuButton>
-        </Link>
+        </a>
       </SidebarHeader>
       <SidebarContent>
         <BoardsList />

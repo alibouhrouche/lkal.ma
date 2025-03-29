@@ -16,33 +16,24 @@ import { Input } from "../ui/input";
 import { ScrollArea } from "../ui/scroll-area";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db, useUser } from "@/db";
-import { useParams } from "react-router";
 import { ask } from "../prompts";
-import {
-  TldrawUiDialogCloseButton,
-  useDialogs,
-} from "tldraw";
+import { TldrawUiDialogCloseButton, useDialogs } from "tldraw";
 import { cn } from "@/lib/utils";
+import { useApp } from "./context";
 
 const selectClassName =
-  "col-start-1 row-start-1 w-full appearance-none rounded-md border-input h-9 border px-3 py-2 text-sm whitespace-nowrap shadow-xs bg-popover text-popover-foreground forced-colors:appearance-auto"; // bg-gray-50 px-2 text-gray-700 hover:border-cyan-500 hover:bg-white dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:border-cyan-700 dark:hover:bg-gray-700 forced-colors:appearance-auto"
-const selectArrowClassName =
-  "pointer-events-none relative right-1 z-10 col-start-1 row-start-1 h-4 w-4 self-center justify-self-end forced-colors:hidden";
-
+  "tl-cursor-pointer w-full appearance-none rounded-md border-input h-9 border px-3 py-2 text-sm whitespace-nowrap shadow-xs bg-popover text-popover-foreground forced-colors:appearance-auto";
 function RoleSelect() {
   return (
-    <div className="grid w-full">
-      <ChevronDown className={selectArrowClassName} />
-      <select
-        name="role"
-        className={selectClassName}
-        defaultValue="viewer"
-        required
-      >
-        <option value="editor">Editor</option>
-        <option value="viewer">Viewer</option>
-      </select>
-    </div>
+    <select
+      name="role"
+      className={selectClassName}
+      defaultValue="viewer"
+      required
+    >
+      <option value="editor">Editor</option>
+      <option value="viewer">Viewer</option>
+    </select>
   );
 }
 
@@ -56,20 +47,17 @@ function RoleChange({
   disabled?: boolean;
 }) {
   return (
-    <div className="grid w-full">
-      <ChevronDown className={selectArrowClassName} />
-      <select
-        disabled={disabled}
-        name="role"
-        className={cn(selectClassName, "mr-4")}
-        value={role}
-        onChange={(e) => onChange(e.target.value)}
-        required
-      >
-        <option value="editor">Editor</option>
-        <option value="viewer">Viewer</option>
-      </select>
-    </div>
+    <select
+      disabled={disabled}
+      name="role"
+      className={cn(selectClassName, "tl-cursor-pointer w-[120px]")}
+      value={role}
+      onChange={(e) => onChange(e.target.value)}
+      required
+    >
+      <option value="editor">Editor</option>
+      <option value="viewer">Viewer</option>
+    </select>
   );
 }
 
@@ -182,7 +170,7 @@ export function SharePanel({
 }
 
 export function ShareDialog() {
-  const id = useParams().id!;
+  const id = useApp().id;
   const board = useLiveQuery(() => db.boards.get(id));
   const user = useUser();
   const isOwner = board?.owner === user?.userId;
@@ -252,7 +240,7 @@ export default function ShareDialogTrigger() {
   return (
     <Button
       size="icon"
-      className="cursor-pointer"
+      className="tl-cursor-pointer"
       onClick={() => {
         addDialog({
           component: ShareDialog,

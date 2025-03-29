@@ -1,11 +1,11 @@
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardHeader } from "@/components/ui/card";
 import {
   CloudAlert,
-  Cookie,
   FolderSync,
   InfinityIcon,
   RadioTower,
   ShieldUser,
+  Sparkles,
 } from "lucide-react";
 
 const features = [
@@ -40,10 +40,10 @@ const features = [
       "Expand your ideas without limits—sketch, write, and organize as freely as you need.",
   },
   {
-    icon: Cookie,
-    title: "Privacy-Focused",
+    icon: Sparkles,
+    title: "AI-Powered Creativity",
     description:
-      "Your data is encrypted and stored securely. You control who can see your boards.",
+      "Instantly generate text and images using Pollinations.ai—perfect for brainstorming, storytelling, and ideation.",
   },
 ];
 
@@ -68,9 +68,6 @@ const Features = () => {
                 {feature.description}
               </p>
             </CardHeader>
-            <CardContent className="mt-auto px-0 pb-0">
-              <div className="bg-muted h-52 ml-6 rounded-tl-xl" />
-            </CardContent>
           </Card>
         ))}
       </div>

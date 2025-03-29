@@ -1,0 +1,1 @@
+export { pwaInfo } from 'virtual:pwa-info';

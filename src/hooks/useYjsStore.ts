@@ -14,11 +14,13 @@ import {
   react,
   SerializedSchema,
   loadSnapshot,
+  TLAssetStore,
 } from "tldraw";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { YKeyValue } from "y-utility/y-keyvalue";
 import * as Y from "yjs";
 import { DexieYProvider } from "dexie";
+import { assetsStore } from "@/db";
 
 export function useYjsStore({
   doc,
@@ -30,6 +32,7 @@ export function useYjsStore({
   const [store] = useState(() => {
     const store = createTLStore({
       shapeUtils: [...defaultShapeUtils, ...shapeUtils],
+      assets: assetsStore,
     });
 
     return store;
@@ -335,6 +338,7 @@ export function useYjsStore({
     });
 
     return () => {
+      room.awareness.setLocalState(null);
       abortController.abort();
       unsubs.forEach((fn) => fn());
       unsubs.length = 0;

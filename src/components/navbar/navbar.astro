@@ -1,0 +1,31 @@
+---
+import LoginButton from "../board/login-button";
+import { Logo } from "../logo";
+import { ModeToggle } from "../mode-toggle";
+import { Skeleton } from "../ui/skeleton";
+import { NavMenu } from "./nav-menu";
+import { NavigationSheet } from "./navigation-sheet";
+---
+
+<nav class="h-16 bg-background border-b border-accent">
+  <div
+    class="h-full flex items-center justify-between max-w-screen-xl mx-auto px-4 sm:px-6"
+  >
+    <Logo />
+
+    {/* Desktop Menu */}
+    <NavMenu className="hidden md:block" />
+
+    <div class="flex items-center gap-3">
+      <ModeToggle />
+      <LoginButton client:only>
+        <Skeleton slot="fallback" className="h-10 w-[100px]" />
+      </LoginButton>
+
+      {/* Mobile Menu */}
+      <div class="md:hidden">
+        <NavigationSheet />
+      </div>
+    </div>
+  </div>
+</nav>

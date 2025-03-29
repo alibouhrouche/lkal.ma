@@ -15,14 +15,6 @@ import {
   useRelevantStyles,
   useTools,
 } from "tldraw";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { componentTypeStyle } from ".";
 
 export const uiOverrides: TLUiOverrides = {
@@ -49,10 +41,7 @@ export const customAssetUrls: TLUiAssetUrlOverrides = {
     sparkles: "/icons/icon/sparkles.svg",
   },
   fonts: {
-    draw: getAssetUrls().fonts.tldraw_draw,
-    monospace: getAssetUrls().fonts.tldraw_mono,
-    sansSerif: getAssetUrls().fonts.tldraw_sans,
-    serif: getAssetUrls().fonts.tldraw_serif,
+    ...getAssetUrls().fonts,
   },
   translations: {
     ...getAssetUrls().translations,
@@ -92,27 +81,23 @@ export const toolsComponents: TLComponents = {
       <DefaultStylePanel>
         <DefaultStylePanelContent styles={styles} />
         {componentType !== undefined && (
-          <Select
+          <select
+            className="tl-text-wrapper w-full border-0 capitalize tl-cursor-pointer appearance-none h-9 px-3 py-2 text-sm whitespace-nowrap bg-input text-popover-foreground forced-colors:appearance-auto"
+            data-font="draw"
             value={componentType.type === "mixed" ? "" : componentType.value}
-            onValueChange={(v) => {
+            onChange={(e) => {
+              const v = e.target.value;
               editor.markHistoryStoppingPoint();
               const value = componentTypeStyle.validate(v);
               editor.setStyleForSelectedShapes(componentTypeStyle, value);
             }}
           >
-            <SelectTrigger className="w-full border-0 capitalize">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                {componentTypeStyle.values.map((value) => (
-                  <SelectItem key={value} value={value} className="capitalize">
-                    {value}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
+            {componentTypeStyle.values.map((value) => (
+              <option key={value} value={value} className="capitalize">
+                {value}
+              </option>
+            ))}
+          </select>
         )}
       </DefaultStylePanel>
     );

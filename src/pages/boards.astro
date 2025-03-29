@@ -1,0 +1,30 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import BoardsGrid from "@/components/boards";
+import { Logo } from "@/components/logo";
+import ModeToggle from "@/components/mode-toggle";
+import LoginButton from "@/components/board/login-button";
+import { Loading } from "@/components/loading";
+import TopPanel from "@/components/board/top-panel";
+---
+
+<Layout title="Boards">
+  <div>
+    <div class="w-full h-16 bg-card flex items-center p-4 justify-between">
+      <a href="/" class="relative flex gap-4 items-center">
+        <Logo />
+        <div class="text-2xl">Boards</div>
+      </a>
+      <div class="sm:absolute sm:left-1/2 transform sm:-translate-x-1/2">
+        <TopPanel client:only />
+      </div>
+      <div class="flex gap-4 items-center">
+        <ModeToggle client:load />
+        <LoginButton client:only />
+      </div>
+    </div>
+    <BoardsGrid client:only>
+      <Loading slot="fallback" />
+    </BoardsGrid>
+  </div>
+</Layout>

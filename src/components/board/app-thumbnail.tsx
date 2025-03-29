@@ -1,7 +1,7 @@
 import { Box, Editor, TLFrameShape, TLShapeId, useEditor } from "tldraw";
 import { useEffect } from "react";
 import { db } from "@/db";
-import { useParams } from "react-router";
+import { useApp } from "./context";
 
 function getCoverFrame(editor: Editor) {
   const shapeIds = editor.store.query.exec("shape", {
@@ -57,7 +57,7 @@ async function getThumbnailSvg(editor: Editor): Promise<[string, string] | undef
 
 export default function AppThumbnail() {
   const editor = useEditor();
-  const id = useParams().id!;
+  const id = useApp().id;
 
   useEffect(() => {
     let timeout: number;

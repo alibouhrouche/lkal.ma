@@ -11,7 +11,7 @@ import { CirclePlay, Loader2 } from "lucide-react";
 import { Button } from "./ui/button";
 import { db } from "@/db";
 import { useCallback, useState } from "react";
-import { useNavigate } from "react-router";
+// import { useNavigate } from "react-router";
 import { toast } from "sonner";
 
 const { demoUsers } = demo;
@@ -19,7 +19,7 @@ const { demoUsers } = demo;
 export default function DemoUsers() {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState("");
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const demoLogin = useCallback((email: string) => {
     setLoading(email);
     db.cloud
@@ -34,16 +34,16 @@ export default function DemoUsers() {
       .then(() => {
         setLoading("");
         setOpen(false);
-        navigate("/boards");
+        location.href = "/boards";
       });
-  }, [navigate]);
+  }, []);
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button
           variant="outline"
           size="lg"
-          className="rounded-full text-base shadow-none"
+          className="cursor-pointer rounded-full text-base shadow-none"
         >
           <CirclePlay className="!h-5 !w-5" /> Visit Demo
         </Button>
@@ -67,7 +67,7 @@ export default function DemoUsers() {
               key={user}
               variant="outline"
               size="lg"
-              className="rounded-full text-base"
+              className="cursor-pointer rounded-full text-base"
               onClick={() => demoLogin(user)}
             >
               {loading === user && (
@@ -79,10 +79,10 @@ export default function DemoUsers() {
           <Button
             variant="outline"
             size="lg"
-            className="rounded-full text-base"
+            className="cursor-pointer rounded-full text-base"
             onClick={() => {
               setOpen(false);
-              navigate("/boards");
+              location.href = "/boards";
             }}
           >
             Continue without an account

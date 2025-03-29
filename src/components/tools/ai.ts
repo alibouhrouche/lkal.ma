@@ -1,22 +1,85 @@
-import { ComponentShape } from ".";
+import { Editor } from "tldraw";
+import { getInputText, NamedInputsData, ShapeData } from "./shapes";
+import models from "./text-models.json";
 
-export function preloadImage(url: string) {
+export function preloadImage(url: string, signal?: AbortSignal) {
   return new Promise((resolve, reject) => {
     const img = new Image();
+    signal?.addEventListener("abort", () => {
+      img.src = "";
+      reject(new Error("Aborted"));
+    });
     img.onload = () => resolve(img);
     img.onerror = reject;
     img.src = url;
   });
 }
 
-function inputsToMessages(
-  value: string,
-  inputs: { shape: ComponentShape; name?: string }[]
+function blobToBase64(blob: Blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64data = reader.result as string;
+      resolve(base64data);
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
+async function getImageData(
+  editor: Editor,
+  namedInputs: NamedInputsData,
+  unamedInputs: ShapeData[]
 ) {
-  const textInputs = inputs.filter((input) =>
-    input.shape.props.data.some((data) => data.type === "text")
-  );
-  if (textInputs.length === 0) {
+  for (const input of unamedInputs) {
+    if (input.type === "image") {
+      return input.src;
+    }
+    if (input.type === "frame") {
+      const shapes = Array.from(editor.getShapeAndDescendantIds([input.id]));
+      const image = await editor.toImage(shapes, {
+        darkMode: false,
+        format: "jpeg",
+        quality: 0.7,
+      });
+      if (!image) {
+        return;
+      }
+      return await blobToBase64(image.blob);
+    }
+  }
+  const namedEntries = Object.entries(namedInputs);
+  for (const [, input] of namedEntries) {
+    const image = input.find((data) => data.type === "image");
+    const frame = input.find((data) => data.type === "frame");
+    if (image) {
+      return image.src;
+    }
+    if (frame) {
+      const shapes = Array.from(editor.getShapeAndDescendantIds([frame.id]));
+      const image = await editor.toImage(shapes, {
+        darkMode: false,
+        format: "jpeg",
+        quality: 0.7,
+      });
+      if (!image) {
+        return;
+      }
+      return await blobToBase64(image.blob);
+    }
+  }
+}
+
+async function inputsToMessages(
+  editor: Editor,
+  value: string,
+  namedInputs: NamedInputsData,
+  unamedInputs: ShapeData[],
+  vision: boolean = false
+) {
+  const joinedText = getInputText(namedInputs, unamedInputs);
+  if (!joinedText) {
     return [
       {
         role: "user",
@@ -24,68 +87,116 @@ function inputsToMessages(
       },
     ];
   }
-  const unnamedInputs = textInputs
-    .filter((input) => !input.name)
-    .map((input) => {
-      const text = input.shape.props.data.find(
-        (data) => data.type === "text"
-      )?.text;
-      if (!text) {
-        return "";
+  const messages = [];
+  const image = vision
+    ? await getImageData(editor, namedInputs, unamedInputs)
+    : null;
+  if (joinedText) {
+    if (value) {
+      messages.push({
+        role: "system",
+        content: value,
+      });
+    }
+    if (image) {
+      messages.push({
+        role: "user",
+        content: [
+          { type: "text", text: joinedText },
+          {
+            type: "image_url",
+            image_url: {
+              url: image,
+            },
+          },
+        ],
+      });
+    } else {
+      messages.push({
+        role: "user",
+        content: joinedText,
+      });
+    }
+  } else {
+    if (value) {
+      if (image) {
+        messages.push({
+          role: "user",
+          content: [
+            { type: "text", text: value },
+            {
+              type: "image_url",
+              image_url: {
+                url: image,
+              },
+            },
+          ],
+        });
+      } else {
+        messages.push({
+          role: "user",
+          content: value,
+        });
       }
-      const dom = new DOMParser().parseFromString(text, "text/html");
-      const value = dom.body.textContent || "";
-      return value;
-    })
-    .join("\n---\n");
-  const namedInputs = textInputs
-    .filter((input) => input.name)
-    .map((input) => {
-      const text = input.shape.props.data.find(
-        (data) => data.type === "text"
-      )?.text;
-      if (!text) {
-        return "";
-      }
-      const dom = new DOMParser().parseFromString(text, "text/html");
-      const value = dom.body.textContent || "";
-      return `<${input.name}>${value}</${input.name}>`;
-    })
-    .join("\n");
-  return [
-    {
-      role: "system",
-      content: value,
-    },
-    {
-      role: "user",
-      content: `${unnamedInputs}\n${namedInputs}`,
-    },
-  ];
+    }
+  }
+  return messages;
 }
 
 export async function textGeneration({
+  editor,
   value,
-  inputs,
+  namedInputs,
+  unnamedInputs,
   seed,
   model,
+  jsonMode = false,
+  privateMode = true,
+  signal,
 }: {
+  editor: Editor;
   value: string;
   seed: number;
   model?: string;
-  inputs: { shape: ComponentShape; name?: string }[];
+  jsonMode?: boolean;
+  namedInputs: NamedInputsData;
+  unnamedInputs: ShapeData[];
+  privateMode?: boolean;
+  signal?: AbortSignal;
 }) {
-  const messages = inputsToMessages(value, inputs);
+  const vision = models.find((m) => m.name === model)?.vision || false;
+  let modelProps: {
+    model?: string;
+    reasoning?: string;
+  } = {
+    model,
+  };
+  if (model?.includes(":")) {
+    const [name, reasoning] = model.split(":");
+    modelProps = {
+      model: name,
+      reasoning: reasoning,
+    };
+  }
+  const messages = await inputsToMessages(
+    editor,
+    value,
+    namedInputs,
+    unnamedInputs,
+    vision
+  );
   const response = await fetch("https://text.pollinations.ai/", {
     method: "POST",
+    signal,
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
       messages,
-      model,
+      ...modelProps,
+      jsonMode,
       seed,
-      private: true,
+      private: privateMode,
     }),
   });
   return await response.text();

@@ -5,7 +5,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { useNavigate } from "react-router";
 import { useCallback, useEffect, useState } from "react";
 import Dexie from "dexie";
 import { ask } from "@/components/prompts";
@@ -50,7 +49,7 @@ export function logout(fromLogout?: boolean) {
 }
 
 const dbLink =
-    (process.env.NEXT_PUBLIC_DEXIE_CLOUD_DB_URL! || '')
+    (import.meta.env.PUBLIC_DEXIE_CLOUD_DB_URL! || '')
       .split('//')[1]
       ?.split('.')[0] || ''
 
@@ -59,16 +58,15 @@ const dbName = 'boards-' + dbLink
 export default function Logout() {
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState("Logging out...");
-  const navigate = useNavigate();
-  const callback = useCallback((fromLogout?: boolean) => {
-    if (!fromLogout) navigate("/logout");
+  const callback = useCallback(() => {
     setOpen(true);
+    caches.delete("avatars");
     Dexie.exists(dbName)
       .then((dbExist) => {
         if (dbExist) {
           setMessage("Deleting database...");
           Dexie.delete(dbName)
-            .then(() => {})
+            .then(() => caches.delete("images"))
             .catch((error) => {
               setMessage(error);
               setTimeout(() => {
@@ -81,12 +79,16 @@ export default function Logout() {
               setMessage("Cleaning up..." as string);
               setTimeout(() => {
                 setOpen(false);
+                if (typeof window !== "undefined") {
+                  location.href = "/";
+                }
               }, 3000);
             });
         } else {
           setMessage("Logging out..." as string);
           setTimeout(() => {
             setOpen(false);
+            location.href = "/";
           }, 3000);
         }
       })
@@ -98,7 +100,7 @@ export default function Logout() {
         }, 3000);
         setMessage(error);
       });
-  }, [navigate]);
+  }, []);
   useEffect(() => {
     logoutObservable.subscribe(callback);
     return () => {

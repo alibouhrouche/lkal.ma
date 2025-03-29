@@ -32,6 +32,10 @@ next-env.d.ts
 public/sw*
 public/swe-worker*
 
+dev-dist
+
+.astro
+
 # Dexie cloud
 dexie-cloud.json
 dexie-cloud.key

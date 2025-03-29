@@ -1,4 +1,4 @@
-import AppGlobals from "./components/board/app-globals";
+import AppGlobals from "./components/app-globals";
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   return (
