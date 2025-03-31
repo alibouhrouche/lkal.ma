@@ -1,11 +1,10 @@
 import Dexie, { type EntityTable } from "dexie";
-// import 'dexie-observable';
 import dexieCloud, { DBRealmMember, UserLogin } from "dexie-cloud-addon";
 import * as Y from "yjs";
 import * as awarenessProtocol from "y-protocols/awareness";
 import { customAlphabet } from "nanoid";
 import { useObservable } from "dexie-react-hooks";
-import { FileHelpers, TLAssetId, TLAssetStore, uniqueId } from "tldraw";
+import { TLAssetId, TLAssetStore } from "tldraw";
 const alphabet =
   "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 const nanoid = customAlphabet(alphabet, 23);
@@ -53,7 +52,7 @@ class DB extends Dexie {
       requireAuth: false,
       tryUseServiceWorker: true,
       periodicSync: {
-        minInterval: 1 * 60 * 60 * 1000,
+        minInterval: 60 * 60 * 1000,
       },
     });
   }

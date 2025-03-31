@@ -1,12 +1,6 @@
-import {
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Button } from "../ui/button";
 import {
   CheckCircle2Icon,
-  ChevronDown,
   CircleAlertIcon,
   Share2Icon,
   XCircleIcon,

@@ -14,6 +14,7 @@ import AppEvents from "./app-events";
 import ContextMenu from "./context-menu";
 import { cn } from "@/lib/utils";
 import TopPanel from "./top-panel";
+import React from "react";
 
 const components: TLComponents = {
   // Define your components here
@@ -58,7 +59,7 @@ export default function TldrawBoard({
           : ""
       )}
       onMount={(editor) => {
-        if (canEdit === false) {
+        if (!canEdit) {
           editor.updateInstanceState({ isReadonly: true });
         }
         editor.user.updateUserPreferences({

@@ -1,7 +1,6 @@
 import {
   DeleteIcon,
   EllipsisVerticalIcon,
-  FilePlus2Icon,
   PlusCircleIcon,
   Trash2Icon,
   XIcon,
@@ -10,7 +9,6 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { Board, db, ISpace } from "@/db";
 import BoardCard from "./board/board-card";
 import { AspectRatio } from "./ui/aspect-ratio";
-// import { Link } from "react-router";
 import { GridComponents, VirtuosoGrid } from "react-virtuoso";
 import React, {
   Dispatch,
@@ -23,7 +21,7 @@ import React, {
 import { Scroller } from "./ui/scroll-area";
 import { Filters } from "./filters";
 import { Checkbox } from "./ui/checkbox";
-import { Button, buttonVariants } from "./ui/button";
+import { Button } from "./ui/button";
 import { ask } from "./prompts";
 import {
   DropdownMenu,
@@ -50,7 +48,7 @@ import {
 } from "@/components/ui/select";
 import { NuqsAdapter } from "nuqs/adapters/react";
 import { parseAsArrayOf, parseAsString, useQueryState } from "nuqs";
-import { Loading, Spinner } from "./loading";
+import { Spinner } from "./loading";
 import { NewBoard } from "./board/app-new";
 
 const List = forwardRef<HTMLDivElement, HtmlHTMLAttributes<HTMLDivElement>>(

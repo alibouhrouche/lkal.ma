@@ -9,7 +9,7 @@ import { db } from "@/db";
 import { useLiveQuery } from "dexie-react-hooks";
 import { Scroller } from "../ui/scroll-area";
 import BoardCard from "./board-card";
-import { ArrowLeftIcon, FilePlus2Icon } from "lucide-react";
+import { ArrowLeftIcon } from "lucide-react";
 import { Virtuoso } from "react-virtuoso";
 import { useApp } from "./context";
 import { NewBoardLink } from "./app-new";

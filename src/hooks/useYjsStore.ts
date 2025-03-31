@@ -14,9 +14,8 @@ import {
   react,
   SerializedSchema,
   loadSnapshot,
-  TLAssetStore,
 } from "tldraw";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { YKeyValue } from "y-utility/y-keyvalue";
 import * as Y from "yjs";
 import { DexieYProvider } from "dexie";
@@ -29,15 +28,6 @@ export function useYjsStore({
   version: number;
   shapeUtils: TLAnyShapeUtilConstructor[];
 }> & { doc: Y.Doc }) {
-  const [store] = useState(() => {
-    const store = createTLStore({
-      shapeUtils: [...defaultShapeUtils, ...shapeUtils],
-      assets: assetsStore,
-    });
-
-    return store;
-  });
-
   const [storeWithStatus, setStoreWithStatus] = useState<TLStoreWithStatus>({
     status: "loading",
   });
@@ -57,7 +47,10 @@ export function useYjsStore({
 
   useEffect(() => {
     setStoreWithStatus({ status: "loading" });
-
+    const store = createTLStore({
+      shapeUtils: [...defaultShapeUtils, ...shapeUtils],
+      assets: assetsStore,
+    });
     const unsubs: (() => void)[] = [];
     const room = DexieYProvider.load(yDoc);
     unsubs.push(() => {
@@ -343,7 +336,7 @@ export function useYjsStore({
       unsubs.forEach((fn) => fn());
       unsubs.length = 0;
     };
-  }, [yDoc, store, yStore, meta]);
+  }, [yDoc, yStore, meta]);
 
   return storeWithStatus;
 }

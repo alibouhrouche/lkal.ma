@@ -2,13 +2,11 @@ import { JsonEditor, githubDarkTheme, githubLightTheme } from "json-edit-react";
 import { ComponentShape } from ".";
 import { useTheme } from "next-themes";
 import { preventDefault, stopEventPropagation, useEditor } from "tldraw";
-import React, { useCallback } from "react";
-import { ScrollArea } from "../ui/scroll-area";
+import React from "react";
 
 export const JSONContent = React.memo(function JSONContent({
   shape,
   editable,
-  isEditing,
 }: {
   shape: ComponentShape;
   editable?: boolean;
