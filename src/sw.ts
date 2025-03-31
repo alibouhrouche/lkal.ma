@@ -1,4 +1,4 @@
-import { db } from "./db";
+import {db, userPromise} from "./db";
 import { NavigationRoute, registerRoute } from "workbox-routing";
 import { StaleWhileRevalidate } from "workbox-strategies";
 import {
@@ -11,25 +11,14 @@ self.addEventListener("message", (event) => {
   if (event.data && event.data.type === "SKIP_WAITING") self.skipWaiting();
 });
 cleanupOutdatedCaches();
-precacheAndRoute(self.__WB_MANIFEST);
 
 const boardView = /\/b\/([^/]+?)\/?$/i;
 const boardAssets = /\/b\/([^/]+?)\/(asset:[^/]+?)\/?$/i;
 
 const networkFallback = ({ request }: { request: Request }) => fetch(request);
 
-const boards = import.meta.env.PROD
-  ? createHandlerBoundToURL("/b")
-  : networkFallback;
-registerRoute(boardView, boards);
-
-const homepage = import.meta.env.PROD
-  ? createHandlerBoundToURL("/")
-  : networkFallback;
-
 registerRoute("/", async (props) => {
-  await db.cloud.sync();
-  const user = db.cloud.currentUser.value;
+  const user = await userPromise();
   if (user?.isLoggedIn) {
     return new Response(null, {
       status: 302,
@@ -40,6 +29,17 @@ registerRoute("/", async (props) => {
   }
   return homepage(props);
 });
+
+precacheAndRoute(self.__WB_MANIFEST);
+
+const boards = import.meta.env.PROD
+    ? createHandlerBoundToURL("/b")
+    : networkFallback;
+registerRoute(boardView, boards);
+
+const homepage = import.meta.env.PROD
+    ? createHandlerBoundToURL("/")
+    : networkFallback;
 
 registerRoute(boardAssets, async ({ url, params }) => {
   const [id, assetId] = (
