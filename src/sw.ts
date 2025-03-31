@@ -1,5 +1,4 @@
-import "dexie-cloud-addon/service-worker";
-import { db, userPromise } from "./db";
+import { db } from "./db";
 import { NavigationRoute, registerRoute } from "workbox-routing";
 import { StaleWhileRevalidate } from "workbox-strategies";
 import {
@@ -29,7 +28,8 @@ const homepage = import.meta.env.PROD
   : networkFallback;
 
 registerRoute("/", async (props) => {
-  const user = await userPromise();
+  await db.cloud.sync();
+  const user = db.cloud.currentUser.value;
   if (user?.isLoggedIn) {
     return new Response(null, {
       status: 302,

@@ -50,7 +50,6 @@ class DB extends Dexie {
       awarenessProtocol: awarenessProtocol,
       customLoginGui: true,
       requireAuth: false,
-      tryUseServiceWorker: true,
       periodicSync: {
         minInterval: 60 * 60 * 1000,
       },
