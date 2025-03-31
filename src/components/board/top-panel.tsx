@@ -1,4 +1,5 @@
 import { db } from "@/db";
+import { useOnline } from "@/hooks/useOnline";
 import { cn } from "@/lib/utils";
 import { useObservable } from "dexie-react-hooks";
 import {
@@ -33,12 +34,21 @@ const colors: Record<SyncStatus, string> = {
 };
 
 export default function TopPanel() {
+  const isOnline = useOnline();
   const sync = useObservable(db.cloud.syncState);
   const Icon = Icons[sync?.phase as SyncStatePhase] || CloudIcon;
+  if (!isOnline) {
+    return (
+      <div className="hidden sm:flex items-center justify-center space-x-2 w-full h-12 p-2 text-red-500">
+        <CloudOffIcon className="w-6 h-6" />
+        <span className="text-xs">Offline</span>
+      </div>
+    );
+  }
   return (
     <div
       className={cn(
-        "flex items-center justify-center space-x-2 w-full h-12 p-2",
+        "hidden sm:flex items-center justify-center space-x-2 w-full h-12 p-2",
         colors[sync?.status as SyncStatus]
       )}
     >

@@ -1,74 +1,19 @@
-import mistql from "mistql";
-import { Editor, TLArrowBinding, TLArrowShape, TLDefaultShape } from "tldraw";
+import { Editor } from "tldraw";
 import type {
   ComponentShape,
   ComponentTypeStyle,
   ComponentShapeProps,
 } from ".";
-import { preloadImage, textGeneration } from "./ai";
+import { textGeneration } from "./ai";
+import {compressImage, loadImage} from "./utils";
 import { marked } from "marked";
 import DOMPurify from "dompurify";
 import { defaultConfig } from "./image";
-import { getData, getInputData, getInputText } from "./shapes";
+import {getData, getInputText, getJSON, getText, hasImage, shapeToImage} from "./shapes";
+import { mistql } from "@/components/tools/query";
+import {getHtmlBlock} from "@/components/tools/html";
 
 type MaybePromise<T> = T | Promise<T>;
-
-function interpolate(str: string, data: Record<string, string>) {
-  return str.replace(/{{([^}]+)}}/g, (_, query: string) => {
-    const res = mistql.query(query, data);
-    if (typeof res === "string") return res;
-    return JSON.stringify(res, null, 2);
-  });
-}
-
-// function getData(shapes: (ComponentShape | TLDefaultShape)[]) {
-//   return shapes.map((shape) => {
-//     switch
-//   });
-// }
-
-function getInputsOutputPoints(
-  editor: Editor,
-  shape: ComponentShape,
-  input: boolean
-) {
-  return editor
-    .getBindingsToShape(shape, "arrow")
-    .filter((binding) => {
-      return (
-        binding.type === "arrow" &&
-        (binding as TLArrowBinding).props.terminal === (input ? "end" : "start")
-      );
-    })
-    .map((binding) => {
-      const arrow: TLArrowShape | undefined = editor.getShape(binding.fromId);
-      const arrowText = arrow?.props.text;
-      const shapes = editor
-        .getBindingsFromShape(binding.fromId, "arrow")
-        .filter((binding) => {
-          return (
-            binding.type === "arrow" &&
-            (binding as TLArrowBinding).props.terminal ===
-              (input ? "start" : "end")
-          );
-        })
-        .map((binding) => ({
-          name: arrowText,
-          shape: editor.getShape(binding.toId) as
-            | ComponentShape
-            | TLDefaultShape,
-        }));
-      return shapes;
-    })
-    .flat();
-}
-
-export function getInputs(editor: Editor, shape: ComponentShape) {
-  return getInputsOutputPoints(editor, shape, true);
-}
-export function getOutputs(editor: Editor, shape: ComponentShape) {
-  return getInputsOutputPoints(editor, shape, false);
-}
 
 export const runners: Record<
   ComponentTypeStyle,
@@ -79,83 +24,68 @@ export const runners: Record<
   }) => MaybePromise<Partial<ComponentShapeProps>>
 > = {
   text({ shape, editor }) {
-    const inputs = getInputs(editor, shape) as {
-      name?: string;
-      shape: ComponentShape;
-    }[];
-    const outputs = getOutputs(editor, shape);
-    if (outputs.length === 0 && inputs.length === 1 && !inputs[0].name) {
-      const input = inputs
-        .map((input) => input.shape.props.data.find((d) => d.type === "text"))
-        .filter(Boolean)
-        .map((d) => d?.text)
-        .join("\n");
-      if (input) {
-        return {
-          value: input,
-          data: [
-            {
-              type: "text",
-              text: input,
-            },
-          ],
-        };
-      }
-    }
-    if (inputs.length === 0)
-      return {
-        data: [{ type: "text", text: shape.props.value }],
-      };
-    const ins: Record<string, string> = {};
-    const unamed = inputs.filter(
-      (input) =>
-        !input.name && input.shape.props.data.some((d) => d.type === "text")
-    );
-    const named = inputs.filter(
-      (input) =>
-        input.name && input.shape.props.data.some((d) => d.type === "text")
-    );
-    let value = shape.props.value;
-    if (unamed.length === 1) {
-      value = unamed
-        .map((input) => input.shape.props.data.find((d) => d.type === "text"))
-        .filter(Boolean)
-        .map((d) => d?.text)
-        .join("\n");
-    }
-    named.forEach((input) => {
-      const data = input.shape.props.data.find((d) => d.type === "text");
-      const dom = new DOMParser().parseFromString(
-        data?.text || "",
-        "text/html"
-      );
-      const value = dom.body.textContent || "";
-      ins[input.name!] = value;
+    const { value, ...props} = getText({
+      editor,
+      shape,
+      prefers: "text/plain",
+      support: ["text/plain"],
     });
     return {
-      value,
-      data: [
-        {
-          type: "text",
-          text: interpolate(value, ins),
-        },
-      ],
-    };
+      value: value.startsWith('<p') ? value : `<p>${value}</p>`,
+      ...props
+    }
+  },
+  website({ shape, editor }) {
+    const { value, ...props } = getText({
+        editor,
+        shape,
+        prefers: "text/html",
+        support: ["text/html"],
+    });
+    return {
+      value: getHtmlBlock(value),
+      ...props
+    }
   },
   async image({ shape, editor, signal }) {
     const { namedInputs, unnamedInputs } = getData(
       editor,
       shape,
       "text/plain",
-      ["text/plain"]
+      ["text/plain", "image/*"],
     );
+    const img = hasImage({unnamedInputs, namedInputs});
+    if (img) {
+      switch (img.type) {
+        case "image":
+          const image = await loadImage(img.src, signal);
+          return {
+            value: "",
+            data: [
+              {
+                type: "image" as const,
+                ...await compressImage({img: image}),
+              },
+            ],
+          };
+        case "frame":
+          return {
+            data: [
+              {
+                type: "image" as const,
+                ...await shapeToImage(editor, img),
+              },
+            ],
+          }
+      }
+    }
     const prompt = getInputText(namedInputs, unnamedInputs);
     if (!prompt) return {};
     const conf = shape.props.config || defaultConfig;
     if (conf.type !== "image") return {};
     const seed = conf.seed ?? Math.floor(Math.random() * 1000000000);
     const url = new URL(
-      `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}`
+      `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}`,
     );
     url.searchParams.set("width", `${conf.width}`);
     url.searchParams.set("height", `${conf.height}`);
@@ -171,7 +101,6 @@ export const runners: Record<
       id: shape.id,
       type: "component",
       props: {
-        ...shape.props,
         value: "",
         data: [
           {
@@ -188,7 +117,7 @@ export const runners: Record<
     });
 
     try {
-      await preloadImage(url.toString(), signal);
+      await loadImage(url.toString(), signal);
     } catch (e) {
       console.error(e);
     }
@@ -213,7 +142,7 @@ export const runners: Record<
       editor,
       shape,
       "text/plain",
-      ["text/html", "text/plain", "image/*"]
+      ["text/html", "text/plain", "image/*"],
     );
     const conf = config?.type === "text" ? config : null;
     if (!value)
@@ -244,25 +173,39 @@ export const runners: Record<
       ],
     };
   },
-  debug({ shape, editor }) {
-    const {
-      namedInputs,
-      unnamedInputs,
-    } = getData(
+  data({ shape, editor }) {
+    const { namedInputs, unnamedInputs } = getData(
       editor,
       shape,
-      "text/plain",
-      ["text/html", "text/plain", "image/*"]
+      "application/json",
+      ["text/plain", "application/json"],
     );
-    const inputs = getInputData({
-      namedInputs,
-      unnamedInputs,
-    })
-    console.log("inputs", inputs);
-    return {
-      value: "",
-      data: []
+    return getJSON({ namedInputs, unnamedInputs, shape });
+  },
+  query({ shape, editor }) {
+    const { value, namedInputs, unnamedInputs } = getData(
+      editor,
+      shape,
+      "application/json",
+      ["text/plain", "application/json"],
+    );
+    const { data } = getJSON({ namedInputs, unnamedInputs, shape });
+    const ret = mistql.query(value, data[0].data);
+    const out: ComponentShapeProps["data"] = [
+      {
+        type: "json",
+        data: ret,
+      },
+    ];
+    if (typeof ret === "string") {
+      out.push({
+        type: "text",
+        text: ret,
+      });
     }
+    return {
+      data: out,
+    };
   },
   button() {
     return {

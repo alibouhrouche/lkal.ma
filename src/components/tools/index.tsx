@@ -20,7 +20,12 @@ import {
   TLResizeInfo,
   TLShapeId,
 } from "tldraw";
-import { GripVerticalIcon, Loader2, Play } from "lucide-react";
+import {
+  AlertTriangleIcon,
+  GripVerticalIcon,
+  Loader2,
+  Play,
+} from "lucide-react";
 import Content from "./content";
 import { runners } from "./run";
 import { CSSProperties, useCallback, useEffect, useState } from "react";
@@ -28,8 +33,10 @@ import { componentRunner } from "./observer";
 import { toAdjacencyList, topologicalSort } from "./graph";
 import { ShowTime, Stopwatch } from "./stopwatch";
 import Config from "./config";
-import { buttonSVG, imageSVG, textSVG } from "./svg";
+import { buttonSVG, dataSVG, imageSVG, textSVG, websiteSVG } from "./svg";
 import DownloadButton from "./download";
+import { toast } from "sonner";
+import ReadOnly from "@/components/tools/readonly.tsx";
 
 const ICON_SIZES = {
   s: 16,
@@ -46,7 +53,15 @@ export class ComponentTool extends BaseBoxShapeTool {
 
 export const componentTypeStyle = StyleProp.defineEnum("component:type", {
   defaultValue: "text",
-  values: ["text", "instruction", "button"/*, "website"*/, "image"],
+  values: [
+    "text",
+    "instruction",
+    "button",
+    "website",
+    "image",
+    "data",
+    "query",
+  ],
 });
 
 const TimePosRight = {
@@ -54,7 +69,11 @@ const TimePosRight = {
   instruction: "right-4",
   image: "right-1",
   website: "right-4",
+  data: "right-4",
+  query: "right-4",
 };
+
+const isSlow = ["image", "instruction"];
 
 // const minSizes = {
 //   text: { w: 250, h: 150 },
@@ -96,7 +115,7 @@ export const componentShapeProps = {
   color: DefaultColorStyle,
   w: T.number,
   h: T.number,
-  value: T.string,
+  value: T.or(T.string, T.jsonDict()),
   procedure: T.nullable(
     T.object({
       description: T.string,
@@ -104,7 +123,7 @@ export const componentShapeProps = {
       outputDescription: T.string,
       steps: T.arrayOf(T.string),
       userPrompt: T.string,
-    })
+    }),
   ),
   readonly: T.boolean,
   data: T.arrayOf(
@@ -127,14 +146,18 @@ export const componentShapeProps = {
         description: T.optional(T.string),
         name: T.optional(T.string),
       }),
-    })
+      json: T.object({
+        type: T.literal("json"),
+        data: T.any,
+      }),
+    }),
   ),
   config: T.optional(T.union("type", ComponentConfigs)),
   scale: T.number,
   font: DefaultFontStyle,
   size: DefaultSizeStyle,
+  fail: T.optional(T.boolean),
   time: T.optional(T.number),
-  dirty: T.optional(T.boolean),
 };
 
 export type ComponentShapeProps = RecordPropsType<typeof componentShapeProps>;
@@ -143,18 +166,26 @@ export type ComponentShape = TLBaseShape<"component", ComponentShapeProps>;
 export class ComponentUtil extends ShapeUtil<ComponentShape> {
   static override type = "component" as const;
   static override props = componentShapeProps;
+
   override isAspectRatioLocked() {
     return false;
   }
+
   override canResize() {
-    return this.editor.getIsReadonly() === false;
+    return !this.editor.getIsReadonly();
   }
+
   override canEdit() {
-    return this.editor.getIsReadonly() === false;
+    return !this.editor.getIsReadonly();
   }
+
   override getFontFaces(shape: ComponentShape): TLFontFace[] {
     if (["text", "instructions"].includes(shape.props.component)) {
-      const richText = renderRichTextFromHTML(this.editor, shape.props.value);
+      const value =
+        typeof shape.props.value !== "string"
+          ? JSON.stringify(shape.props.value)
+          : shape.props.value;
+      const richText = renderRichTextFromHTML(this.editor, value);
       return getFontsFromRichText(this.editor, richText, {
         family: `tldraw_${shape.props.font}`,
         weight: "normal",
@@ -163,6 +194,7 @@ export class ComponentUtil extends ShapeUtil<ComponentShape> {
     }
     return [];
   }
+
   getDefaultProps(): ComponentShapeProps {
     return {
       component: "text",
@@ -178,6 +210,7 @@ export class ComponentUtil extends ShapeUtil<ComponentShape> {
       scale: 1,
     };
   }
+
   getGeometry(shape: ComponentShape): Geometry2d {
     return new Rectangle2d({
       width: shape.props.w,
@@ -185,6 +218,7 @@ export class ComponentUtil extends ShapeUtil<ComponentShape> {
       isFilled: true,
     });
   }
+
   component(shape: ComponentShape) {
     const theme = getDefaultColorTheme({
       isDarkMode: this.editor.user.getIsDarkMode(),
@@ -242,7 +276,7 @@ export class ComponentUtil extends ShapeUtil<ComponentShape> {
             <button
               className="tl-cursor-pointer p-2"
               onPointerDown={(e) => {
-                if (canEdit === false) return;
+                if (!canEdit) return;
                 e.stopPropagation();
                 run();
               }}
@@ -252,6 +286,8 @@ export class ComponentUtil extends ShapeUtil<ComponentShape> {
                   className="animate-spin"
                   size={ICON_SIZES[shape.props.size]}
                 />
+              ) : shape.props.fail ? (
+                <AlertTriangleIcon size={ICON_SIZES[shape.props.size]} />
               ) : (
                 <Play size={ICON_SIZES[shape.props.size]} />
               )}
@@ -264,6 +300,7 @@ export class ComponentUtil extends ShapeUtil<ComponentShape> {
     return (
       <HTMLContainer
         id={shape.id}
+        className="ring-primary ring-2"
         style={
           {
             display: "flex",
@@ -290,7 +327,7 @@ export class ComponentUtil extends ShapeUtil<ComponentShape> {
           <div
             className="flex items-center gap-2"
             onPointerDown={(e) => {
-              if (canEdit === false) return;
+              if (!canEdit) return;
               e.stopPropagation();
             }}
           >
@@ -301,13 +338,16 @@ export class ComponentUtil extends ShapeUtil<ComponentShape> {
               canEdit={canEdit}
               loading={loading}
             />
+            <ReadOnly editor={this.editor} shape={shape} />
             <button
               className="tl-cursor-pointer hover:opacity-75"
-              disabled={loading !== false || canEdit === false}
+              disabled={loading !== false || !canEdit}
               onPointerDown={run}
             >
               {loading ? (
                 <Loader2 className="animate-spin" size={16} />
+              ) : shape.props.fail ? (
+                <AlertTriangleIcon size={16} />
               ) : (
                 <Play size={16} />
               )}
@@ -329,23 +369,32 @@ export class ComponentUtil extends ShapeUtil<ComponentShape> {
             onRun={run}
           />
         </div>
-        {loading !== false ? (
-          <Stopwatch className={TimePosRight[componentType]} start={loading} />
-        ) : (
-          <ShowTime
-            className={TimePosRight[componentType]}
-            time={shape.props.time ?? 0}
-          />
-        )}
+        {isSlow.includes(shape.props.component) &&
+          (loading !== false ? (
+            <Stopwatch
+              className={TimePosRight[componentType]}
+              start={loading}
+            />
+          ) : (
+            <ShowTime
+              className={TimePosRight[componentType]}
+              time={shape.props.time ?? 0}
+            />
+          ))}
       </HTMLContainer>
     );
   }
+
   indicator(shape: ComponentShape) {
-    return <rect width={shape.props.w} height={shape.props.h} />;
+    return (
+      <rect rx="10px" ry="10px" width={shape.props.w} height={shape.props.h} />
+    );
   }
+
   override onResize(shape: ComponentShape, info: TLResizeInfo<ComponentShape>) {
     return resizeBox(shape, info);
   }
+
   async run(shape: ComponentShape) {
     const abort = new AbortController();
     const signal = abort.signal;
@@ -353,9 +402,10 @@ export class ComponentUtil extends ShapeUtil<ComponentShape> {
     const namesMap = new Map<TLShapeId, (string | undefined)[]>();
     const adj = toAdjacencyList(this.editor, shape.id, namesMap);
     const order = topologicalSort(adj).map(
-      (id) => this.editor.getShape(id)! as ComponentShape
+      (id) => this.editor.getShape(id)! as ComponentShape,
     );
     for (const shape of order) {
+      if (shape.props.readonly) continue;
       const start = performance.now();
       componentRunner.notify({ id: shape.id, loading: start, abort });
       signal?.throwIfAborted();
@@ -370,25 +420,42 @@ export class ComponentUtil extends ShapeUtil<ComponentShape> {
           id: shape.id,
           type: "component",
           props: {
-            ...shape.props,
             ...props,
+            fail: false,
             time: end - start,
           },
         });
+      } catch (e: any) {
+        this.editor.updateShape({
+          id: shape.id,
+          type: "component",
+          props: {
+            fail: true,
+            time: 0,
+          },
+        });
+        console.error(e);
+        toast.error(`Error: ${e.message} failed to run.`);
       } finally {
         componentRunner.notify({ id: shape.id, loading: false });
       }
     }
   }
+
   override async toSvg(shape: ComponentShape, ctx: SvgExportContext) {
     switch (shape.props.component) {
       case "image":
         return imageSVG({ editor: this.editor, shape, ctx });
       case "text":
       case "instruction":
+      case "query":
         return textSVG({ editor: this.editor, shape, ctx });
       case "button":
         return buttonSVG({ editor: this.editor, shape, ctx });
+      case "data":
+        return dataSVG({ editor: this.editor, shape, ctx });
+      case "website":
+        return websiteSVG({ editor: this.editor, shape, ctx });
       default:
         return null;
     }

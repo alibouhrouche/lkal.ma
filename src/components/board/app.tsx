@@ -8,7 +8,7 @@ import { useRoute } from "wouter";
 import { Spinner } from "../loading";
 import TopPanel from "./top-panel";
 
-export default function BoardLayout() {
+export default function App() {
   const defaultOpen = localStorage.getItem("sidebar_state") === "true";
   const [match, params] = useRoute("/b/:id");
 

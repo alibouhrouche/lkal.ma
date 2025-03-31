@@ -1,5 +1,5 @@
 import "dexie-cloud-addon/service-worker";
-import { db } from "./db";
+import { db, userPromise } from "./db";
 import { NavigationRoute, registerRoute } from "workbox-routing";
 import { StaleWhileRevalidate } from "workbox-strategies";
 import {
@@ -7,42 +7,55 @@ import {
   createHandlerBoundToURL,
   precacheAndRoute,
 } from "workbox-precaching";
-import { clientsClaim } from "workbox-core";
 declare let self: ServiceWorkerGlobalScope;
-self.skipWaiting();
-clientsClaim();
+self.addEventListener("message", (event) => {
+  if (event.data && event.data.type === "SKIP_WAITING") self.skipWaiting();
+});
 cleanupOutdatedCaches();
 precacheAndRoute(self.__WB_MANIFEST);
 
 const boardView = /\/b\/([^/]+?)\/?$/i;
 const boardAssets = /\/b\/([^/]+?)\/(asset:[^/]+?)\/?$/i;
 
-if (import.meta.env.PROD) {
-  const boardsSpa = createHandlerBoundToURL("/b");
-  registerRoute(boardView, boardsSpa);
-}
+const networkFallback = ({ request }: { request: Request }) => fetch(request);
+
+const boards = import.meta.env.PROD
+  ? createHandlerBoundToURL("/b")
+  : networkFallback;
+registerRoute(boardView, boards);
+
+const homepage = import.meta.env.PROD
+  ? createHandlerBoundToURL("/")
+  : networkFallback;
+
+registerRoute("/", async (props) => {
+  const user = await userPromise();
+  if (user?.isLoggedIn) {
+    return new Response(null, {
+      status: 302,
+      headers: {
+        Location: "/boards",
+      },
+    });
+  }
+  return homepage(props);
+});
 
 registerRoute(boardAssets, async ({ url, params }) => {
-    const [id, assetId] = (Array.isArray(params) ? params : boardAssets.exec(url.pathname)?.slice(1)) as [string, string];
-    const board = await db.boards.get(id);
-    if (!board) {
-      return new Response("Not found", { status: 404 });
-    }
-    const assets = board.assets;
-    if (!assets) {
-      return new Response("Not found", { status: 404 });
-    }
-    const file = assets[assetId];
-    if (!file) {
-      return new Response("Not found", { status: 404 });
-    }
-    return new Response(file);
+  const [id, assetId] = (
+    Array.isArray(params) ? params : boardAssets.exec(url.pathname)?.slice(1)
+  ) as [string, string];
+  const board = await db.boards.get(id);
+  const file = board?.assets?.[assetId];
+  if (!file) {
+    return new Response("Not found", { status: 404 });
   }
-)
+  return new Response(file);
+});
 
 registerRoute(
   ({ url }) => {
-    return url.host === "image.pollinations.ai"
+    return url.host === "image.pollinations.ai";
   },
   new StaleWhileRevalidate({
     cacheName: "images",
@@ -58,4 +71,8 @@ registerRoute(
   })
 );
 
-registerRoute(new NavigationRoute(createHandlerBoundToURL('/404')))
+registerRoute(
+  new NavigationRoute(
+    import.meta.env.PROD ? createHandlerBoundToURL("/404") : networkFallback
+  )
+);

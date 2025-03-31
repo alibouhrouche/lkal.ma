@@ -1,14 +1,30 @@
 import { EditorView } from "@tiptap/pm/view";
 import Document from "@tiptap/extension-document";
+import Blockquote from "@tiptap/extension-blockquote";
+import Bold from "@tiptap/extension-bold";
+import BulletList from "@tiptap/extension-bullet-list";
+import Code from "@tiptap/extension-code";
+import Dropcursor from "@tiptap/extension-dropcursor";
+import Gapcursor from "@tiptap/extension-gapcursor";
+import HardBreak from "@tiptap/extension-hard-break";
+import Heading from "@tiptap/extension-heading";
+import History from "@tiptap/extension-history";
+import HorizontalRule from "@tiptap/extension-horizontal-rule";
+import Italic from "@tiptap/extension-italic";
 import ListItem from "@tiptap/extension-list-item";
 import OrderedList from "@tiptap/extension-ordered-list";
-import History from "@tiptap/extension-history";
 import Paragraph from "@tiptap/extension-paragraph";
+import Strike from "@tiptap/extension-strike";
 import Text from "@tiptap/extension-text";
+import Highlight from "@tiptap/extension-highlight";
+import Typography from "@tiptap/extension-typography";
+import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
+import { all, createLowlight } from 'lowlight'
 import {
   EditorContent,
   EditorEvents,
   useEditor as useHTMLEditor,
+  Extensions,
 } from "@tiptap/react";
 import React, { useCallback, useEffect } from "react";
 import {
@@ -20,11 +36,10 @@ import {
   useEditor,
 } from "tldraw";
 import { ComponentShape } from ".";
-import CommandContent from "./commands";
-import { Label } from "../ui/label";
 import ImageContent from "./image";
-import { cn } from "@/lib/utils";
-import InstructionConfig from "./instructions";
+import { JSONContent } from "./json";
+
+const lowlight = createLowlight(all)
 
 export const FONT_SIZES: Record<TLDefaultSizeStyle, number> = {
   s: 12,
@@ -96,6 +111,35 @@ function handleTab(editor: Editor, view: EditorView, event: KeyboardEvent) {
   }
 }
 
+const extensions: Extensions = [
+  Document,
+  Paragraph,
+  Text,
+  History,
+  Bold,
+  Blockquote,
+  BulletList,
+  Code,
+  CodeBlockLowlight.configure({
+    lowlight,
+  }),
+  Dropcursor,
+  Gapcursor,
+  HardBreak,
+  Heading,
+  HorizontalRule,
+  Italic,
+  Strike,
+  ListItem,
+  OrderedList,
+  Highlight,
+  Typography,
+];
+
+const stopEventPropagationNoZoom = (event: React.WheelEvent) => {
+  if (!event.ctrlKey) event.stopPropagation();
+};
+
 export const EditableContent = React.memo(function Content({
   shape,
   style,
@@ -119,7 +163,7 @@ export const EditableContent = React.memo(function Content({
         },
       });
     },
-    [editor, shapeId]
+    [editor, shapeId],
   );
 
   const onKeyDown = useCallback(
@@ -128,18 +172,26 @@ export const EditableContent = React.memo(function Content({
         handleTab(editor, view, event);
       } else if (event.key === "Enter" && event.ctrlKey) {
         event.preventDefault();
+        const pos = view.state.selection.from;
         onRun?.();
+        setTimeout(() => {
+          htmlEditor.commands.setTextSelection(pos)
+          view.focus();
+        });
       }
     },
-    [editor, onRun]
+    [editor, onRun],
   );
 
   const htmlEditor = useHTMLEditor({
-    extensions: [Document, Paragraph, Text, History, OrderedList, ListItem],
+    extensions,
     content: shape.props.value,
     onUpdate: handleUpdate,
     editorProps: {
       handleKeyDown: onKeyDown,
+    },
+    parseOptions: {
+      preserveWhitespace: "full",
     },
     editable,
     immediatelyRender: true,
@@ -174,9 +226,10 @@ export const EditableContent = React.memo(function Content({
       onContextMenu={stopEventPropagation}
       onPointerDownCapture={stopEventPropagation}
       onTouchEnd={stopEventPropagation}
+      onWheelCapture={stopEventPropagationNoZoom}
       onDragStart={preventDefault}
     >
-      <div className="tl-rich-text w-full h-full">
+      <div className="relative tl-rich-text w-full h-full">
         <EditorContent
           autoFocus
           editor={htmlEditor}
@@ -188,28 +241,17 @@ export const EditableContent = React.memo(function Content({
   );
 });
 
-// function InstructionContent({
-//   shape,
-//   editable,
-//   isEditing,
-//   onRun,
-// }: {
-//   shape: ComponentShape;
-//   editable?: boolean;
-//   isEditing?: boolean;
-//   onRun?: () => void;
-// }) {
-//   return (
-//     <div className={cn("relative w-full h-full", isEditing && "grid grid-cols-2")}>
-//       <EditableContent
-//           shape={shape}
-//           editable={editable}
-//           onRun={onRun}
-//         />
-//       {isEditing && <InstructionConfig shape={shape} loading={false} />}
-//     </div>
-//   );
-// }
+function WebsiteContent({ shape }: { shape: ComponentShape }) {
+  return (
+    <div className="w-full h-full p-2 overflow-x-hidden">
+      <iframe
+        srcDoc={String(shape.props.value)}
+        className="w-full h-full border-none rounded-md"
+        sandbox="allow-scripts allow-modals allow-forms"
+      />
+    </div>
+  );
+}
 
 export default React.memo(function Content({
   shape,
@@ -224,20 +266,30 @@ export default React.memo(function Content({
   isEditing?: boolean;
   onRun?: () => void;
 }) {
+  const readonly = shape.props.readonly;
   switch (shape.props.component) {
     case "text":
     case "instruction":
+    case "query":
       return (
         <EditableContent
           shape={shape}
-          editable={!loading && canEdit}
+          editable={!loading && !readonly && canEdit}
           onRun={onRun}
         />
       );
-    case "debug":
-      return <div className="w-full h-full overflow-auto p-2"><pre className="text-wrap">{shape.props.value}</pre></div>;
     case "image":
       return <ImageContent shape={shape} isEditing={isEditing} />;
+    case "data":
+      return (
+        <JSONContent
+          shape={shape}
+          editable={!loading && !readonly && canEdit}
+          isEditing={isEditing}
+        />
+      );
+    case "website":
+      return <WebsiteContent shape={shape} />;
     default:
       return null;
   }

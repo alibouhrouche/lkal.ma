@@ -119,7 +119,6 @@ export const userPromise = () =>
 
 export const db = new DB();
 
-
 const boardsRegex = /^\/b\/([^/]+?)\/?$/i;
 
 export const assetsStore: TLAssetStore = {
@@ -132,7 +131,6 @@ export const assetsStore: TLAssetStore = {
     if (!board) {
       throw new Error("No board found");
     }
-    console.log("uploading", asset, file);
     db.boards.update(id, {
       assets: {
         ...board.assets,
@@ -146,35 +144,18 @@ export const assetsStore: TLAssetStore = {
     if (!id) {
       throw new Error("No board id found");
     }
-    console.log("removing", assets);
-    db.boards.where("id").equals(id).modify((board) => {
-      board.assets = Object.fromEntries(
-        Object.entries(board.assets ?? {}).filter(([key]) => !assets.includes(key as TLAssetId))
-      );
-    });
+    db.boards
+      .where("id")
+      .equals(id)
+      .modify((board) => {
+        board.assets = Object.fromEntries(
+          Object.entries(board.assets ?? {}).filter(
+            ([key]) => !assets.includes(key as TLAssetId)
+          )
+        );
+      });
   },
   resolve: async (asset) => {
-    // return asset.props.src;
-      const id = boardsRegex.exec(location.pathname)?.[1];
-      if (!id) {
-        throw new Error("No board id found");
-      }
-      return `${location.origin}/b/${id}/${asset.id}`;
-    // const board = await db.getBoard(id);
-    // if (!board) {
-    //   throw new Error("No board found");
-    // }
-    // const assets = board.assets;
-    // if (!assets) {
-    //   throw new Error("No assets found");
-    // }
-    // const file = assets[asset.id];
-    // if (!file) {
-    //   throw new Error("No file found");
-    // }
-    // const url = URL.createObjectURL(file);
-    // return url;
+    return asset.props.src;
   },
 };
-
-Reflect.set(self, "assetsStore", assetsStore);

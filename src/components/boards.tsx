@@ -51,6 +51,7 @@ import {
 import { NuqsAdapter } from "nuqs/adapters/react";
 import { parseAsArrayOf, parseAsString, useQueryState } from "nuqs";
 import { Loading, Spinner } from "./loading";
+import { NewBoard } from "./board/app-new";
 
 const List = forwardRef<HTMLDivElement, HtmlHTMLAttributes<HTMLDivElement>>(
   ({ style, children, ...props }, ref) => (
@@ -100,26 +101,6 @@ const ItemWrapper = ({
   </AspectRatio>
 );
 
-const newBoard = () => {
-  db.newBoard().then((id) => {
-    location.href = `/b/${id}`;
-  });
-};
-
-const NewBoard = React.memo(function NewBoard() {
-  return (
-    <div className="cursor-pointer rounded-xl" onClick={newBoard}>
-      <AspectRatio
-        ratio={16 / 9}
-        className="p-1 hover:bg-primary/50 rounded-xl"
-      >
-        <div className="h-full w-full flex justify-center items-center bg-gray-200 dark:bg-[#101011] text-black dark:text-white rounded-lg overflow-hidden">
-          <PlusCircleIcon className="size-12" />
-        </div>
-      </AspectRatio>
-    </div>
-  );
-});
 
 function AddBoardToCollection({
   collections,

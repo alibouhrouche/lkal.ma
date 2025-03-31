@@ -9,9 +9,11 @@ import { db } from "@/db";
 import { useLiveQuery } from "dexie-react-hooks";
 import { Scroller } from "../ui/scroll-area";
 import BoardCard from "./board-card";
-import { ArrowLeftIcon } from "lucide-react";
+import { ArrowLeftIcon, FilePlus2Icon } from "lucide-react";
 import { Virtuoso } from "react-virtuoso";
 import { useApp } from "./context";
+import { NewBoardLink } from "./app-new";
+import { prefetch } from "astro:prefetch";
 
 function BoardsList() {
   const id = useApp().id!;
@@ -35,16 +37,21 @@ function BoardsList() {
   );
 }
 
+const prefetchBoards = () => {
+  prefetch("/boards");
+}
+
 export function AppSidebar() {
   return (
     <Sidebar>
-      <SidebarHeader>
-        <a href="/boards">
+      <SidebarHeader className="flex flex-row items-center justify-between">
+        <a href="/boards" className="w-full" onMouseOver={prefetchBoards}>
           <SidebarMenuButton className="cursor-pointer">
             <ArrowLeftIcon size={24} />
-            <span>See all boards</span>
+            <span>See all</span>
           </SidebarMenuButton>
         </a>
+        <NewBoardLink />
       </SidebarHeader>
       <SidebarContent>
         <BoardsList />

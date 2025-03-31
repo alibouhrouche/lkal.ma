@@ -126,6 +126,29 @@
   body {
     @apply bg-background text-foreground;
   }
+  .json-viewer textarea {
+    scrollbar-gutter: stable;
+    @apply bg-background !text-foreground;
+  }
+  .json-viewer {
+    background: var(--bg) !important;
+    color: var(--fg) !important;
+  }
+  .jer-select {
+    background-image: unset !important;
+    background-color: var(--background) !important;
+    color: var(--foreground) !important;
+  }
+  .jer-input-number {
+    background-color: var(--background) !important;
+    color: var(--foreground) !important;
+  }
+  .jer-input-boolean {
+    background-color: var(--background) !important;
+  }
+  .jer-select select {
+    @apply !bg-background !text-foreground;
+  }
 }
 
 .app * {
@@ -149,7 +172,7 @@
   --tw-prose-kbd-shadows: var(--fg);
   --tw-prose-code: var(--fg);
   --tw-prose-pre-code: var(--fg);
-  --tw-prose-pre-bg: var(--fg);
+  --tw-prose-pre-bg: var(--bg);
   --tw-prose-th-borders: var(--fg);
   --tw-prose-td-borders: var(--fg);
 }
@@ -168,6 +191,12 @@ html {
   cursor: pointer;
   cursor: var(--tl-cursor-pointer, pointer);
 }
+
+.tl-cursor-text {
+  cursor: text;
+  cursor: var(--tl-cursor-text);
+}
+
 .tl-cursor {
   cursor: var(--tl-cursor);
 }

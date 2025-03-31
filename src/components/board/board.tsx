@@ -1,6 +1,6 @@
 import MainMenu from "@/components/board/main-menu";
 import SharePanel from "@/components/board/share-panel";
-import { TLAssetStore, TLComponents, Tldraw } from "tldraw";
+import { TLComponents, Tldraw } from "tldraw";
 import { ComponentTool, ComponentUtil } from "../tools";
 import {
   customAssetUrls,
@@ -11,7 +11,6 @@ import * as Y from "yjs";
 import { useYjsStore } from "@/hooks/useYjsStore";
 import { useTheme } from "next-themes";
 import AppEvents from "./app-events";
-import AppThumbnail from "./app-thumbnail";
 import ContextMenu from "./context-menu";
 import { cn } from "@/lib/utils";
 import TopPanel from "./top-panel";

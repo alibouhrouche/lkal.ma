@@ -1,16 +1,8 @@
 import {
-  Box,
-  Editor,
-  FileHelpers,
-  getDefaultColorTheme,
   preventDefault,
-  stopEventPropagation,
-  SvgExportContext,
-  useEditor,
 } from "tldraw";
-import { ComponentConfigImage, ComponentShape, ComponentShapeProps } from ".";
-import React, { useState } from "react";
-import { Button } from "../ui/button";
+import { ComponentConfigImage, ComponentShape } from ".";
+import React from "react";
 
 export const defaultConfig = {
   type: "image",
@@ -223,7 +215,6 @@ export function ImageConfig({
 
 export default React.memo(function ImageContent({
   shape,
-  isEditing,
 }: {
   shape: ComponentShape;
   isEditing?: boolean;
@@ -253,17 +244,11 @@ export default React.memo(function ImageContent({
         />
       </svg>
       <div
-        className="absolute bottom-0 right-0 w-5/12 h-5/12"
+        className="absolute bottom-0 right-0 w-full h-full"
         style={{
-          background: "linear-gradient(-45deg, black, transparent 50%)",
+          background: "linear-gradient(-45deg, rgba(0,0,0,0.75), transparent 100px)",
         }}
       ></div>
-      {/* {isEditing && (
-        <>
-          <div className="absolute inset-0 bg-(--bg) opacity-75" />
-          <ImageConfig shape={shape} />
-        </>
-      )} */}
     </div>
   );
 });

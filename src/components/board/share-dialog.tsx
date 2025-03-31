@@ -17,7 +17,7 @@ import { ScrollArea } from "../ui/scroll-area";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db, useUser } from "@/db";
 import { ask } from "../prompts";
-import { TldrawUiDialogCloseButton, useDialogs } from "tldraw";
+import { TldrawUiDialogBody, TldrawUiDialogCloseButton, TldrawUiDialogHeader, TldrawUiDialogTitle, useDialogs } from "tldraw";
 import { cn } from "@/lib/utils";
 import { useApp } from "./context";
 
@@ -175,63 +175,60 @@ export function ShareDialog() {
   const user = useUser();
   const isOwner = board?.owner === user?.userId;
   return (
-    <div className="bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed top-[50%] left-[50%] z-[500] grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border p-6 shadow-lg duration-200 sm:max-w-lg">
-      <DialogHeader>
-        <DialogTitle>Share board</DialogTitle>
-        <DialogDescription>
-          Share this board with others by inviting them to collaborate.
-        </DialogDescription>
-        <div className="ring-offset-background focus:ring-ring data-[state=open]:bg-accent data-[state=open]:text-muted-foreground absolute top-4 right-4 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4">
-          <TldrawUiDialogCloseButton />
+    <>
+      <TldrawUiDialogHeader>
+				<TldrawUiDialogTitle>Share board</TldrawUiDialogTitle>
+				<TldrawUiDialogCloseButton />
+			</TldrawUiDialogHeader>
+      <TldrawUiDialogBody style={{ maxWidth: "calc(100vw-2rem)", width: 450 }}>
+        <div className="space-y-4">
+          {isOwner && (
+            <form
+              className="grid grid-cols-3 w-full items-center gap-1.5"
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (!board) return;
+                const formData = new FormData(e.target as HTMLFormElement);
+                const email = formData.get("email") as string;
+                const role = formData.get("role") as string;
+                (e.target as HTMLFormElement).reset();
+                if (!email || !role) return;
+                if (!["editor", "viewer"].includes(role)) return;
+                ask({
+                  type: "confirm",
+                  title: "Invite",
+                  message: `Do you want to invite ${email} as a ${role}?`,
+                  ok: "Invite",
+                  callback: async () => {
+                    await db.addMember(board, email, role);
+                  },
+                });
+              }}
+            >
+              <Input
+                className="tl-cursor-text col-span-2 bg-background text-foreground"
+                required
+                type="email"
+                name="email"
+                id="email"
+                placeholder="Email"
+              />
+              <RoleSelect />
+            </form>
+          )}
+          <ScrollArea className="max-h-64 w-full">
+            <div className="p-4">
+              <h4 className="mb-4 text-sm font-medium leading-none">
+                People with access
+              </h4>
+              {board?.realmId && (
+                <SharePanel isOwner={true} realmId={board.realmId} />
+              )}
+            </div>
+          </ScrollArea>
         </div>
-      </DialogHeader>
-      <div className="space-y-4">
-        {isOwner && (
-          <form
-            className="grid grid-cols-3 w-full items-center gap-1.5"
-            onSubmit={(e) => {
-              e.preventDefault();
-              if (!board) return;
-              const formData = new FormData(e.target as HTMLFormElement);
-              const email = formData.get("email") as string;
-              const role = formData.get("role") as string;
-              (e.target as HTMLFormElement).reset();
-              if (!email || !role) return;
-              if (!["editor", "viewer"].includes(role)) return;
-              ask({
-                type: "confirm",
-                title: "Invite",
-                message: `Do you want to invite ${email} as a ${role}?`,
-                ok: "Invite",
-                callback: async () => {
-                  await db.addMember(board, email, role);
-                },
-              });
-            }}
-          >
-            <Input
-              className="col-span-2"
-              required
-              type="email"
-              name="email"
-              id="email"
-              placeholder="Email"
-            />
-            <RoleSelect />
-          </form>
-        )}
-        <ScrollArea className="max-h-64 w-full rounded-md border">
-          <div className="p-4">
-            <h4 className="mb-4 text-sm font-medium leading-none">
-              People with access
-            </h4>
-            {board?.realmId && (
-              <SharePanel isOwner={true} realmId={board.realmId} />
-            )}
-          </div>
-        </ScrollArea>
-      </div>
-    </div>
+      </TldrawUiDialogBody>
+    </>
   );
 }
 

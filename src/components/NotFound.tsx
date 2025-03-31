@@ -28,7 +28,7 @@ export default function NotFound() {
           className={buttonVariants({
             variant: "link",
           })}
-          href="/"
+          href="/boards"
         >
           <ArrowLeft className="size-6" />
           Go home

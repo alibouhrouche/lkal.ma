@@ -1,38 +1,14 @@
 import { Editor } from "tldraw";
 import { getInputText, NamedInputsData, ShapeData } from "./shapes";
 import models from "./text-models.json";
+import { blobToBase64 } from "./utils";
 
-export function preloadImage(url: string, signal?: AbortSignal) {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    signal?.addEventListener("abort", () => {
-      img.src = "";
-      reject(new Error("Aborted"));
-    });
-    img.onload = () => resolve(img);
-    img.onerror = reject;
-    img.src = url;
-  });
-}
-
-function blobToBase64(blob: Blob) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const base64data = reader.result as string;
-      resolve(base64data);
-    };
-    reader.onerror = reject;
-    reader.readAsDataURL(blob);
-  });
-}
-
-async function getImageData(
+export async function getImageData(
   editor: Editor,
   namedInputs: NamedInputsData,
-  unamedInputs: ShapeData[]
+  unnamedInputs: ShapeData[],
 ) {
-  for (const input of unamedInputs) {
+  for (const input of unnamedInputs) {
     if (input.type === "image") {
       return input.src;
     }
@@ -76,7 +52,7 @@ async function inputsToMessages(
   value: string,
   namedInputs: NamedInputsData,
   unamedInputs: ShapeData[],
-  vision: boolean = false
+  vision: boolean = false,
 ) {
   const joinedText = getInputText(namedInputs, unamedInputs);
   if (!joinedText) {
@@ -183,7 +159,7 @@ export async function textGeneration({
     value,
     namedInputs,
     unnamedInputs,
-    vision
+    vision,
   );
   const response = await fetch("https://text.pollinations.ai/", {
     method: "POST",

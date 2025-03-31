@@ -1,19 +1,21 @@
 import { DownloadIcon } from "lucide-react";
 import { ComponentShape } from ".";
-import { stopEventPropagation } from "tldraw";
 
 export default function DownloadButton({ shape }: { shape: ComponentShape }) {
   const img = shape.props.data.find((d) => d.type === "image")?.src;
   if (!img) return null;
   return (
-    <a
+    <div
       className="tl-cursor-pointer"
-      href={img}
-      target="_blank"
-      rel="noopener noreferrer"
-      onContextMenu={stopEventPropagation}
+      onPointerDown={() => {
+        const a = document.createElement("a");
+        a.href = img;
+        a.download = "image.png";
+        a.click();
+        a.remove();
+      }}
     >
       <DownloadIcon size={16} />
-    </a>
+    </div>
   );
 }
