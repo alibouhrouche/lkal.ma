@@ -1,12 +1,13 @@
 import { ThemeProvider } from "next-themes";
 import { SidebarProvider } from "../ui/sidebar";
-import AppBoard from "./app-board";
 import { AppSidebar } from "./app-sidebar";
 import { AppContext } from "./context";
 import { AppTitle } from "./app-title";
 import { useRoute } from "wouter";
-import { Spinner } from "../loading";
-import TopPanel from "./top-panel";
+import {LoadingFallback, Spinner} from "../loading";
+import AppStatus from "./app-status.tsx";
+import {lazy, Suspense} from "react";
+const AppBoard = lazy(() => import("./app-board"));
 
 export default function App() {
   const defaultOpen = localStorage.getItem("sidebar_state") === "true";
@@ -15,7 +16,10 @@ export default function App() {
   if (!match) {
     return (
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <TopPanel />
+        <AppStatus>
+          <AppStatus.Icon className="w-6 h-6" />
+          <AppStatus.Text className="text-sm" />
+        </AppStatus>
         <Spinner />
         <div className="text-sm p-4 text-gray-500 dark:text-gray-400">
           Invalid board URL, go back to{" "}
@@ -39,7 +43,9 @@ export default function App() {
           <AppTitle />
           <AppSidebar />
           <main className="w-full">
-            <AppBoard />
+            <Suspense fallback={<LoadingFallback />}>
+              <AppBoard />
+            </Suspense>
           </main>
         </SidebarProvider>
       </ThemeProvider>

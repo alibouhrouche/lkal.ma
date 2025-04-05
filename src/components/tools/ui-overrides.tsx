@@ -16,8 +16,20 @@ import {
   useTools,
 } from "tldraw";
 import { componentTypeStyle } from ".";
+import {print} from "@/components/board/print.ts";
 
 export const uiOverrides: TLUiOverrides = {
+  actions(editor, actions) {
+    actions.print = {
+      id: "print",
+      icon: "printer",
+      label: "Print",
+      kbd: "$p",
+      onSelect: () => print(editor),
+    };
+
+    return actions;
+  },
   tools(editor, tools) {
     tools.component = {
       id: "component",

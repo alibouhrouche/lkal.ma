@@ -5,7 +5,7 @@ import { Logo } from "@/components/logo";
 import ModeToggle from "@/components/mode-toggle";
 import LoginButton from "@/components/board/login-button";
 import { Loading } from "@/components/loading";
-import TopPanel from "@/components/board/top-panel";
+import { SyncStatus } from "@/components/sync-status";
 ---
 
 <Layout title="Boards">
@@ -16,7 +16,7 @@ import TopPanel from "@/components/board/top-panel";
         <div class="text-2xl">Boards</div>
       </a>
       <div class="sm:absolute sm:left-1/2 transform sm:-translate-x-1/2">
-        <TopPanel client:only />
+        <SyncStatus client:only />
       </div>
       <div class="flex gap-4 items-center">
         <ModeToggle client:load />

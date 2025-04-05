@@ -22,6 +22,12 @@ export const Spinner = (props: LucideProps) => (
   </svg>
 );
 
+export const LoadingFallback = () => (
+    <div className="w-full h-full flex items-center justify-center">
+        <Spinner />
+    </div>
+);
+
 export const Loading = () => (
   <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
     <Spinner />

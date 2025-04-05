@@ -12,6 +12,7 @@ import { ComponentShape } from ".";
 import { interpolate } from "@/components/tools/query.ts";
 import { escapeHtml } from "@/components/tools/html.ts";
 import {compressImage, loadImageBlob} from "@/components/tools/utils.ts";
+import toMarkdown from "@/components/tools/markdown.ts";
 
 function getInputsOutputPoints(
   editor: Editor,
@@ -209,14 +210,14 @@ export function getData(
   if (typeof value === "object") {
     value = JSON.stringify(value);
   }
-  if (prefers === "text/plain" || !support.includes("text/html")) {
-    const text = renderPlaintextFromRichText(
-      editor,
-      renderRichTextFromHTML(editor, value),
-    );
-
-    value = text || "";
-  }
+  // if (prefers === "text/plain" || !support.includes("text/html")) {
+  //   const text = renderPlaintextFromRichText(
+  //     editor,
+  //     renderRichTextFromHTML(editor, value),
+  //   );
+  //
+  //   value = text || "";
+  // }
   for (const input of inputs) {
     const data = resolveData(editor, input.shape, prefers, support);
     if (input.name) {
@@ -252,7 +253,6 @@ export async function shapeToImage(
   data: Extract<ShapeData, { type: "frame" }>,
 ) {
   const set = editor.getShapeAndDescendantIds([data.id]);
-  set.delete(data.id);
   const shapes = Array.from(set);
   const image = await editor.toImage(shapes, {
     darkMode: false,
@@ -500,26 +500,26 @@ export function getInputData({
 
 export function getInputText(
   namedInputs: NamedInputsData,
-  unamedInputs: ShapeData[],
+  unnamedInputs: ShapeData[],
 ) {
   const namedEntries = Object.entries(namedInputs);
-  if (namedEntries.length === 0 && unamedInputs.length === 0) {
+  if (namedEntries.length === 0 && unnamedInputs.length === 0) {
     return "";
   }
   let textContent = [];
-  if (unamedInputs.length > 0) {
+  if (unnamedInputs.length > 0) {
     textContent.push(
-      unamedInputs
-        .filter((input) => input.type === "text")
-        .map((input) => input.text)
+      unnamedInputs
+        .filter((input) => input.type === "html")
+        .map((input) => toMarkdown(input.html))
         .join("\n---\n"),
     );
   }
   if (namedEntries.length > 0) {
     for (const [name, input] of namedEntries) {
-      const text = input.find((data) => data.type === "text")?.text;
+      const text = input.find((data) => data.type === "html")?.html;
       if (text) {
-        textContent.push(`<${name}>${text}</${name}>`);
+        textContent.push(`<${name}>${toMarkdown(text)}</${name}>`);
       }
     }
   }

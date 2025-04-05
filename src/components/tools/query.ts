@@ -13,7 +13,7 @@ export const mistql = new MistQLInstance({
 export function interpolate(str: string, data: Record<string, string>) {
     return str.replace(/{{([^}]+)}}/g, (_, query: string) => {
         const res = mistql.query(query, data);
-        if (typeof res === "string") return res;
+        if (typeof res === "string") return res.replace(/^<p>/, "").replace(/<\/p>$/, "");
         return JSON.stringify(res, null, 2);
     });
 }

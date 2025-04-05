@@ -14,7 +14,12 @@ export const registerPWA = () => {
         action: {
           label: "Reload",
           onClick: () => {
-            updateServiceWorker(true);
+            toast.promise(updateServiceWorker(true), {
+              id,
+              loading: "Updating...",
+              success: "Reloading...",
+              error: "Failed to update, please try again later.",
+            });
           },
         },
         cancel: {
@@ -22,7 +27,7 @@ export const registerPWA = () => {
           onClick: () => {
             toast.dismiss(id);
           },
-        }
+        },
       });
     },
     onOfflineReady() {

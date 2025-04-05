@@ -180,7 +180,7 @@ export class ComponentUtil extends ShapeUtil<ComponentShape> {
   }
 
   override getFontFaces(shape: ComponentShape): TLFontFace[] {
-    if (["text", "instructions"].includes(shape.props.component)) {
+    if (["text", "instructions", "query"].includes(shape.props.component)) {
       const value =
         typeof shape.props.value !== "string"
           ? JSON.stringify(shape.props.value)
@@ -191,6 +191,16 @@ export class ComponentUtil extends ShapeUtil<ComponentShape> {
         weight: "normal",
         style: "normal",
       });
+    }
+    if (shape.props.component === "data") {
+      return [{
+        src: {
+          url: `tldraw_${shape.props.font}`,
+        },
+        family: `tldraw_${shape.props.font}`,
+        weight: "normal",
+        style: "normal",
+      }];
     }
     return [];
   }
@@ -265,7 +275,7 @@ export class ComponentUtil extends ShapeUtil<ComponentShape> {
           }}
         >
           <div
-            className="tl-cursor rounded-full flex items-center justify-center hover:opacity-75"
+            className="tl-cursor rounded-full flex items-center justify-center hover:opacity-75 ring-primary ring-2"
             style={{
               width: min,
               height: min,

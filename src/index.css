@@ -126,6 +126,54 @@
   body {
     @apply bg-background text-foreground;
   }
+  .tl-rich-text {
+    h1 {
+        @apply text-5xl;
+    }
+    h2 {
+        @apply text-3xl;
+    }
+    h3 {
+        @apply text-2xl;
+    }
+    h4 {
+        @apply text-xl;
+    }
+    ol {
+      @apply list-decimal [&>li]:mt-2;
+    }
+    ul {
+      @apply list-disc [&>li]:mt-2;
+    }
+    pre {
+        font-size: 1em;
+        line-height: 1.6;
+        /*margin-top: 1.6em;*/
+        /*margin-bottom: 1.6em;*/
+        border-radius: 4rem;
+        padding-top: 0.6em;
+        padding-inline-end: 1em;
+        padding-bottom: 0.6em;
+        padding-inline-start: 1em;
+    }
+    pre code {
+      background-color: transparent;
+      border-width: 0;
+      border-radius: 0;
+      padding: 0;
+      font-weight: inherit;
+      color: inherit;
+      font-size: inherit;
+      font-family: inherit;
+      line-height: inherit;
+    }
+  pre code::before {
+      content: none;
+  }
+  pre code::after {
+      content: none;
+  }
+  }
   .json-viewer textarea {
     scrollbar-gutter: stable;
     @apply bg-background !text-foreground;
@@ -133,6 +181,7 @@
   .json-viewer {
     background: var(--bg) !important;
     color: var(--fg) !important;
+    font-family: inherit !important;
   }
   .jer-select {
     background-image: unset !important;

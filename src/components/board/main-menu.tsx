@@ -1,14 +1,12 @@
 import {
   DefaultMainMenu,
-  DefaultMainMenuContent,
   EditSubmenu,
   ExportFileContentSubMenu,
   ExtrasGroup,
-  PreferencesGroup,
+  PreferencesGroup, PrintItem,
   TldrawUiMenuGroup,
   TldrawUiMenuItem,
-  useDialogs,
-  ViewSubmenu,
+  useDialogs, ViewSubmenu,
 } from "tldraw";
 import { useSidebar } from "../ui/sidebar";
 import { PanelLeftIcon } from "lucide-react";
@@ -68,6 +66,7 @@ export default function MainMenu() {
           <ViewSubmenu />
           <ExportFileContentSubMenu />
           <AssetsList />
+          <PrintItem />
           <ExtrasGroup />
         </TldrawUiMenuGroup>
         <PreferencesGroup />

@@ -21,6 +21,7 @@ import * as Y from "yjs";
 import { DexieYProvider } from "dexie";
 import { assetsStore } from "@/db";
 
+// Modified from https://github.com/tldraw/tldraw-yjs-example/blob/main/src/useYjsStore.ts
 export function useYjsStore({
   doc,
   shapeUtils = [],

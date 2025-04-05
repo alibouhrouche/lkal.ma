@@ -11,12 +11,19 @@ import { ScrollArea } from "../ui/scroll-area";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db, useUser } from "@/db";
 import { ask } from "../prompts";
-import { TldrawUiDialogBody, TldrawUiDialogCloseButton, TldrawUiDialogHeader, TldrawUiDialogTitle, useDialogs } from "tldraw";
+import {
+  TldrawUiDialogBody,
+  TldrawUiDialogCloseButton,
+  TldrawUiDialogHeader,
+  TldrawUiDialogTitle,
+  useDialogs,
+} from "tldraw";
 import { cn } from "@/lib/utils";
 import { useApp } from "./context";
 
 const selectClassName =
-  "tl-cursor-pointer w-full appearance-none rounded-md border-input h-9 border px-3 py-2 text-sm whitespace-nowrap shadow-xs bg-popover text-popover-foreground forced-colors:appearance-auto";
+  "tl-cursor-pointer shrink-[2] w-full appearance-none rounded-md border-input h-9 border px-3 py-2 text-sm whitespace-nowrap shadow-xs bg-popover text-popover-foreground forced-colors:appearance-auto";
+
 function RoleSelect() {
   return (
     <select
@@ -91,7 +98,7 @@ export function SharePanel({
   isOwner?: boolean;
 }) {
   const members = useLiveQuery(() =>
-    db.members.where("realmId").equals(realmId).toArray()
+    db.members.where("realmId").equals(realmId).toArray(),
   );
   return (
     <div className="flex flex-col items-center space-y-2 mt-2">
@@ -125,7 +132,6 @@ export function SharePanel({
                           callback: async (result) => {
                             if (!result) return;
                             await db.updateBoard(member, role);
-                            db.cloud.sync();
                           },
                         })
                       }
@@ -171,14 +177,14 @@ export function ShareDialog() {
   return (
     <>
       <TldrawUiDialogHeader>
-				<TldrawUiDialogTitle>Share board</TldrawUiDialogTitle>
-				<TldrawUiDialogCloseButton />
-			</TldrawUiDialogHeader>
-      <TldrawUiDialogBody style={{ maxWidth: "calc(100vw-2rem)", width: 450 }}>
-        <div className="space-y-4">
+        <TldrawUiDialogTitle>Share board</TldrawUiDialogTitle>
+        <TldrawUiDialogCloseButton />
+      </TldrawUiDialogHeader>
+      <TldrawUiDialogBody className="max-w-full w-[450px]">
+        <div className="space-y-4 w-full">
           {isOwner && (
             <form
-              className="grid grid-cols-3 w-full items-center gap-1.5"
+              className="flex sm:grid sm:grid-cols-3 w-full items-center gap-1.5"
               onSubmit={(e) => {
                 e.preventDefault();
                 if (!board) return;
@@ -200,7 +206,7 @@ export function ShareDialog() {
               }}
             >
               <Input
-                className="tl-cursor-text col-span-2 bg-background text-foreground"
+                className="tl-cursor-text shrink col-span-2 bg-background text-foreground"
                 required
                 type="email"
                 name="email"
@@ -216,7 +222,10 @@ export function ShareDialog() {
                 People with access
               </h4>
               {board?.realmId && (
-                <SharePanel isOwner={true} realmId={board.realmId} />
+                <SharePanel
+                  isOwner={board?.owner === user?.userId}
+                  realmId={board.realmId}
+                />
               )}
             </div>
           </ScrollArea>

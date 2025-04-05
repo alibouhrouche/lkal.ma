@@ -2,6 +2,7 @@ import { Editor } from "tldraw";
 import { getInputText, NamedInputsData, ShapeData } from "./shapes";
 import models from "./text-models.json";
 import { blobToBase64 } from "./utils";
+import toMarkdown from "@/components/tools/markdown.ts";
 
 export async function getImageData(
   editor: Editor,
@@ -47,31 +48,33 @@ export async function getImageData(
   }
 }
 
+
 async function inputsToMessages(
   editor: Editor,
   value: string,
   namedInputs: NamedInputsData,
-  unamedInputs: ShapeData[],
+  unnamedInputs: ShapeData[],
   vision: boolean = false,
 ) {
-  const joinedText = getInputText(namedInputs, unamedInputs);
+  const joinedText = getInputText(namedInputs, unnamedInputs);
+  console.log(namedInputs, unnamedInputs)
   if (!joinedText) {
     return [
       {
         role: "user",
-        content: value,
+        content: toMarkdown(value),
       },
     ];
   }
   const messages = [];
   const image = vision
-    ? await getImageData(editor, namedInputs, unamedInputs)
+    ? await getImageData(editor, namedInputs, unnamedInputs)
     : null;
   if (joinedText) {
     if (value) {
       messages.push({
         role: "system",
-        content: value,
+        content: toMarkdown(value),
       });
     }
     if (image) {
@@ -99,7 +102,7 @@ async function inputsToMessages(
         messages.push({
           role: "user",
           content: [
-            { type: "text", text: value },
+            { type: "text", text: toMarkdown(value) },
             {
               type: "image_url",
               image_url: {
@@ -111,7 +114,7 @@ async function inputsToMessages(
       } else {
         messages.push({
           role: "user",
-          content: value,
+          content: toMarkdown(value),
         });
       }
     }

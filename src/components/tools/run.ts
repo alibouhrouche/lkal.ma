@@ -27,8 +27,8 @@ export const runners: Record<
     const { value, ...props} = getText({
       editor,
       shape,
-      prefers: "text/plain",
-      support: ["text/plain"],
+      prefers: "text/html",
+      support: ["text/html"],
     });
     return {
       value: value.startsWith('<p') ? value : `<p>${value}</p>`,
@@ -141,7 +141,7 @@ export const runners: Record<
     const { value, config, namedInputs, unnamedInputs } = getData(
       editor,
       shape,
-      "text/plain",
+      "text/html",
       ["text/html", "text/plain", "image/*"],
     );
     const conf = config?.type === "text" ? config : null;
@@ -187,7 +187,7 @@ export const runners: Record<
       editor,
       shape,
       "application/json",
-      ["text/plain", "application/json"],
+      ["text/plain", "text/html", "application/json"],
     );
     const { data } = getJSON({ namedInputs, unnamedInputs, shape });
     const ret = mistql.query(value, data[0].data);
@@ -197,13 +197,19 @@ export const runners: Record<
         data: ret,
       },
     ];
-    if (typeof ret === "string") {
+    if ([
+        "string",
+        "number",
+        "boolean",
+        "bigint",
+    ].includes(typeof ret)) {
       out.push({
         type: "text",
-        text: ret,
+        text: String(ret),
       });
     }
     return {
+      value: value,
       data: out,
     };
   },

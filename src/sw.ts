@@ -1,4 +1,5 @@
-import {db, userPromise} from "./db";
+import "dexie-cloud-addon/service-worker";
+import { db, userPromise } from "./db";
 import { NavigationRoute, registerRoute } from "workbox-routing";
 import { StaleWhileRevalidate } from "workbox-strategies";
 import {
@@ -6,6 +7,7 @@ import {
   createHandlerBoundToURL,
   precacheAndRoute,
 } from "workbox-precaching";
+
 declare let self: ServiceWorkerGlobalScope;
 self.addEventListener("message", (event) => {
   if (event.data && event.data.type === "SKIP_WAITING") self.skipWaiting();
@@ -33,13 +35,13 @@ registerRoute("/", async (props) => {
 precacheAndRoute(self.__WB_MANIFEST);
 
 const boards = import.meta.env.PROD
-    ? createHandlerBoundToURL("/b")
-    : networkFallback;
+  ? createHandlerBoundToURL("/b")
+  : networkFallback;
 registerRoute(boardView, boards);
 
 const homepage = import.meta.env.PROD
-    ? createHandlerBoundToURL("/")
-    : networkFallback;
+  ? createHandlerBoundToURL("/")
+  : networkFallback;
 
 registerRoute(boardAssets, async ({ url, params }) => {
   const [id, assetId] = (
@@ -59,7 +61,11 @@ registerRoute(
   },
   new StaleWhileRevalidate({
     cacheName: "images",
-  })
+    fetchOptions: {
+      mode: "cors",
+      credentials: "omit",
+    },
+  }),
 );
 
 registerRoute(
@@ -68,11 +74,11 @@ registerRoute(
   },
   new StaleWhileRevalidate({
     cacheName: "avatars",
-  })
+  }),
 );
 
 registerRoute(
   new NavigationRoute(
-    import.meta.env.PROD ? createHandlerBoundToURL("/404") : networkFallback
-  )
+    import.meta.env.PROD ? createHandlerBoundToURL("/404") : networkFallback,
+  ),
 );

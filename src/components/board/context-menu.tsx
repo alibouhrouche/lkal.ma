@@ -17,12 +17,12 @@ const BLACK_PNG =
   "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mMUEBD8DwABmwEy6T0sogAAAABJRU5ErkJggg==";
 
 async function getThumbnail(
-  editor: Editor
+  editor: Editor,
 ): Promise<[string, string] | undefined> {
   const coverFrame = editor.getSelectedShapeIds();
   if (!coverFrame) return;
   const shapes = Array.from(editor.getShapeAndDescendantIds(coverFrame)).map(
-    (id) => editor.getShape(id)!
+    (id) => editor.getShape(id)!,
   );
   if (shapes.length === 0) return [WHITE_PNG, BLACK_PNG];
   const lightModeJPG = await editor.toImage(shapes, {
@@ -48,31 +48,29 @@ function SetAsThumbnail() {
   const id = useApp().id;
   if (editor.getSelectedShapeIds().length === 0) return null;
   return (
-    <TldrawUiMenuGroup id="extra">
-      <TldrawUiMenuItem
-        id="thumbnail"
-        label="Set as thumbnail"
-        onSelect={async () => {
-          if (isGenerating) {
-            toast.error("Thumbnail generation in progress");
-            return;
-          }
-          isGenerating = true;
-          const toastId = toast.loading("Generating thumbnail...");
-          const thumbnail = await getThumbnail(editor);
-          if (!thumbnail) {
-            toast.error("Failed to generate thumbnail", {
-              id: toastId,
-            });
-            isGenerating = false;
-            return;
-          }
-          await db.boards.update(id, { thumbnail });
-          toast.success("Thumbnail set", { id: toastId });
+    <TldrawUiMenuItem
+      id="thumbnail"
+      label="Set as thumbnail"
+      onSelect={async () => {
+        if (isGenerating) {
+          toast.error("Thumbnail generation in progress");
+          return;
+        }
+        isGenerating = true;
+        const toastId = toast.loading("Generating thumbnail...");
+        const thumbnail = await getThumbnail(editor);
+        if (!thumbnail) {
+          toast.error("Failed to generate thumbnail", {
+            id: toastId,
+          });
           isGenerating = false;
-        }}
-      />
-    </TldrawUiMenuGroup>
+          return;
+        }
+        await db.boards.update(id, { thumbnail });
+        toast.success("Thumbnail set", { id: toastId });
+        isGenerating = false;
+      }}
+    />
   );
 }
 
@@ -80,7 +78,9 @@ export default function ContextMenu(props: TLUiContextMenuProps) {
   return (
     <DefaultContextMenu {...props}>
       <DefaultContextMenuContent />
-      <SetAsThumbnail />
+      <TldrawUiMenuGroup id="extra">
+        <SetAsThumbnail />
+      </TldrawUiMenuGroup>
     </DefaultContextMenu>
   );
 }

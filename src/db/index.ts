@@ -10,7 +10,7 @@ const alphabet =
 const nanoid = customAlphabet(alphabet, 23);
 
 type BoardAssets = {
-  [name: string]: Blob;
+  [name: string]: Blob | string;
 };
 export interface Board {
   id: string;
@@ -50,6 +50,7 @@ class DB extends Dexie {
       awarenessProtocol: awarenessProtocol,
       customLoginGui: true,
       requireAuth: false,
+      tryUseServiceWorker: true,
       periodicSync: {
         minInterval: 60 * 60 * 1000,
       },
@@ -68,7 +69,7 @@ class DB extends Dexie {
         represents: `a board`,
       });
       // Create board and put it in the new realm.
-      return await this.boards.add({
+      return this.boards.add({
         id,
         name: "New Board",
         created_at: now,
@@ -98,7 +99,7 @@ class DB extends Dexie {
   async newSpace(title: string) {
     const id = nanoid();
     const now = new Date();
-    return await this.spaces.add({
+    return this.spaces.add({
       id,
       title,
       created_at: now,
@@ -119,6 +120,16 @@ export const db = new DB();
 
 const boardsRegex = /^\/b\/([^/]+?)\/?$/i;
 
+const blobToBase64 = (blob: Blob) =>
+    new Promise<string>((resolve => {
+        const reader = new FileReader();
+        reader.onload = () => {
+            resolve(reader.result as string);
+        };
+        reader.readAsDataURL(blob);
+    }
+));
+
 export const assetsStore: TLAssetStore = {
   upload: async (asset, file) => {
     const id = boardsRegex.exec(location.pathname)?.[1];
@@ -129,12 +140,30 @@ export const assetsStore: TLAssetStore = {
     if (!board) {
       throw new Error("No board found");
     }
-    db.boards.update(id, {
-      assets: {
-        ...board.assets,
-        [asset.id]: file,
-      },
-    });
+    if (file.size < 1024 * 1024) {
+      return { src: await blobToBase64(file) };
+    }
+    // if (file.size < 1024 * 1024) { // 1MB
+    //   const b64 = await new Promise<string>((resolve) => {
+    //     const reader = new FileReader();
+    //     reader.onload = () => {
+    //       resolve(reader.result as string);
+    //     };
+    //     reader.readAsDataURL(file);
+    //   });
+    //   db.boards.update(id, {
+    //     assets: {
+    //       ...board.assets,
+    //       [asset.id]: b64,
+    //     },
+    //   });
+    // } else {
+      db.boards.update(id, {
+        assets: {
+          ...board.assets,
+          [asset.id]: file,
+        },
+      });
     return { src: `${location.origin}/b/${id}/${asset.id}` };
   },
   remove: async (assets) => {

@@ -13,7 +13,7 @@ export function calculateAspectRatioFit(
   srcHeight: number,
   maxWidth: number,
   maxHeight: number,
-) {
+): { width: number; height: number } {
   var ratio = Math.min(maxWidth / srcWidth, maxHeight / srcHeight);
 
   return { width: srcWidth * ratio, height: srcHeight * ratio };

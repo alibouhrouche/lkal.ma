@@ -17,14 +17,14 @@ import { NavigationSheet } from "./navigation-sheet";
     <NavMenu className="hidden md:block" />
 
     <div class="flex items-center gap-3">
-      <ModeToggle />
+      <ModeToggle client:load />
       <LoginButton client:only>
         <Skeleton slot="fallback" className="h-10 w-[68px]" />
       </LoginButton>
 
       {/* Mobile Menu */}
       <div class="md:hidden">
-        <NavigationSheet />
+        <NavigationSheet client:visible />
       </div>
     </div>
   </div>

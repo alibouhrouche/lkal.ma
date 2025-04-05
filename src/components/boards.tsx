@@ -50,6 +50,7 @@ import { NuqsAdapter } from "nuqs/adapters/react";
 import { parseAsArrayOf, parseAsString, useQueryState } from "nuqs";
 import { Spinner } from "./loading";
 import { NewBoard } from "./board/app-new";
+import AppStatus from "@/components/board/app-status.tsx";
 
 const List = forwardRef<HTMLDivElement, HtmlHTMLAttributes<HTMLDivElement>>(
   ({ style, children, ...props }, ref) => (

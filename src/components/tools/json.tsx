@@ -16,13 +16,14 @@ export const JSONContent = React.memo(function JSONContent({
   const { resolvedTheme } = useTheme();
   return (
     <div
-      className="w-full h-full rounded-none"
+      className="w-full h-full rounded-none tl-text-wrapper"
       onPointerDownCapture={stopEventPropagation}
       onWheelCapture={stopEventPropagation}
       onTouchEnd={stopEventPropagation}
       onDragStart={preventDefault}
+      data-font={shape.props.font}
     >
-      <div className="w-full h-full overflow-y-scroll">
+      <div className="w-full h-full overflow-y-scroll tl-rich-text">
         <JsonEditor
           theme={resolvedTheme === "dark" ? githubDarkTheme : githubLightTheme}
           className="w-full h-full json-viewer"

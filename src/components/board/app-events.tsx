@@ -19,12 +19,14 @@ export default function AppEvents() {
       () => {
         window.clearTimeout(timeout);
         timeout = window.setTimeout(() => {
-          db.boards.update(id, {
-            updated_at: new Date(),
-          }).timeout(1000);
+          db.boards
+            .update(id, {
+              updated_at: new Date(),
+            })
+            .timeout(1000);
         }, 1000);
       },
-      { scope: "document", source: "user" }
+      { scope: "document", source: "user" },
     );
     return () => {
       unlisten();

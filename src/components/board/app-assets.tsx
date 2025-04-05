@@ -1,5 +1,3 @@
-import { assetsStore, db } from "@/db";
-import { useLiveQuery } from "dexie-react-hooks";
 import {
   TLAssetId,
   TldrawUiButton,
@@ -11,13 +9,16 @@ import {
   TldrawUiDialogTitle,
   useEditor,
 } from "tldraw";
-import { useApp } from "./context";
 import { useState } from "react";
-import { CheckIcon, ExternalLinkIcon } from "lucide-react";
+import {
+  ClipboardPasteIcon,
+  ExternalLinkIcon,
+  XIcon,
+} from "lucide-react";
 import { Button, buttonVariants } from "../ui/button";
+import { cn } from "@/lib/utils.ts";
 
 export default function AppAssets({ onClose }: { onClose(): void }) {
-  const id = useApp().id;
   const editor = useEditor();
   const assets = editor.getAssets();
   const [selected, setSelected] = useState<string[]>([]);
@@ -32,48 +33,105 @@ export default function AppAssets({ onClose }: { onClose(): void }) {
           {assets.length > 0 ? (
             assets.map((asset) => (
               <div key={asset.id} className="relative flex items-center">
-                <Button
-                  variant="secondary"
-                  size="icon"
-                  className="absolute top-4 left-4 z-50"
-                  onClick={() => {
-                    if (selected?.includes(asset.id)) {
-                      setSelected(selected.filter((k) => k !== asset.id));
-                    } else {
-                      setSelected([...selected, asset.id]);
-                    }
-                  }}
-                >
-                  <CheckIcon
+                <div className="absolute flex w-full top-0 p-2 left-0 justify-between z-50">
+                  <Button
+                    variant="secondary"
+                    size="icon"
                     className={
-                      selected?.includes(asset.id)
-                        ? "visible text-primary-foreground"
-                        : "invisible"
+                      selected?.includes(asset.id) ? "bg-destructive" : ""
                     }
-                  />
-                </Button>
-                {asset.type === "image" && (
+                    onClick={() => {
+                      if (selected?.includes(asset.id)) {
+                        setSelected(selected.filter((k) => k !== asset.id));
+                      } else {
+                        setSelected([...selected, asset.id]);
+                      }
+                    }}
+                    title="Select For Deletion"
+                  >
+                    <XIcon
+                      strokeWidth="4"
+                      className={
+                        selected?.includes(asset.id)
+                          ? "visible text-red-500"
+                          : "invisible"
+                      }
+                    />
+                  </Button>
+                  {asset.props.src && (
+                    <a
+                      href={asset.props.src ?? ""}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={buttonVariants({
+                        size: "icon",
+                      })}
+                      title="Open In New Tab"
+                    >
+                      <ExternalLinkIcon className="text-primary-foreground" />
+                    </a>
+                  )}
+                  <Button
+                    size="icon"
+                    title="Paste Asset"
+                    onClick={() => {
+                      const box = editor.getViewportPageBounds();
+                      switch (asset.type) {
+                        case "image":
+                          editor.createShape({
+                            type: "image",
+                            x: box.x + box.width / 2 - asset.props.w / 2,
+                            y: box.y + box.height / 2 - asset.props.h / 2,
+                            props: {
+                              assetId: asset.id,
+                              w: asset.props.w,
+                              h: asset.props.h,
+                            },
+                          });
+                          break;
+                        case "bookmark":
+                          editor.createShape({
+                            type: "bookmark",
+                            x: box.x + box.width / 2 - 300 / 2,
+                            y: box.y + box.height / 2 - 320 / 2,
+                            props: {
+                              assetId: asset.id,
+                              w: 300,
+                              h: 320,
+                              url: asset.props.src,
+                            },
+                          });
+                      }
+                      onClose();
+                    }}
+                  >
+                    <ClipboardPasteIcon />
+                  </Button>
+                </div>
+                {asset.type === "image" && asset.props.src && (
                   <img
-                    src={`/b/${id}/${asset.id}`}
-                    className="w-full h-auto max-h-72 object-cover rounded-md border border-gray-200 dark:border-gray-700"
+                    src={asset.props.src}
+                    className={cn(
+                      "w-full h-auto max-h-72 min-h-64 object-cover rounded-md border border-gray-200 dark:border-gray-700",
+                      selected?.includes(asset.id) && "opacity-50"
+                    )}
                   />
                 )}
-                <a
-                  href={`/b/${id}/${asset.id}`}
-                  target="_blank"
-                  className={buttonVariants({
-                    className: "absolute top-4 right-4 z-50",
-                    size: "icon",
-                  })}
-                >
-                  <ExternalLinkIcon className="text-primary-foreground" />
-                </a>
+                {asset.type === "bookmark" && (
+                  <div className="h-full flex flex-col justify-end min-h-24 z-10 p-2 w-full bg-card rounded-md border border-gray-200 dark:border-gray-700"
+                    style={{
+                        backgroundImage: `linear-gradient(rgba(0,0,0,0), rgba(0,0,0,1)), url(${asset.props.image})`,
+                        backgroundSize: "cover",
+                        backgroundPosition: "center",
+                    }}
+                  >
+                    <div className="break-all mt-16">{asset.props.title}</div>
+                  </div>
+                )}
               </div>
             ))
           ) : (
-            <div>
-                No assets found
-            </div>
+            <div>No assets found</div>
           )}
         </div>
       </TldrawUiDialogBody>
