@@ -1,57 +1,52 @@
-import { EditorView } from "@tiptap/pm/view";
-import Document from "@tiptap/extension-document";
-import Blockquote from "@tiptap/extension-blockquote";
-import Bold from "@tiptap/extension-bold";
-import BulletList from "@tiptap/extension-bullet-list";
-import Code from "@tiptap/extension-code";
-import Dropcursor from "@tiptap/extension-dropcursor";
-import Gapcursor from "@tiptap/extension-gapcursor";
-import HardBreak from "@tiptap/extension-hard-break";
-import Heading from "@tiptap/extension-heading";
-import History from "@tiptap/extension-history";
-import HorizontalRule from "@tiptap/extension-horizontal-rule";
-import Italic from "@tiptap/extension-italic";
-import ListItem from "@tiptap/extension-list-item";
-import OrderedList from "@tiptap/extension-ordered-list";
-import Paragraph from "@tiptap/extension-paragraph";
-import Strike from "@tiptap/extension-strike";
-import Text from "@tiptap/extension-text";
-import Highlight from "@tiptap/extension-highlight";
-import Typography from "@tiptap/extension-typography";
-import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
-import { all, createLowlight } from "lowlight";
-import {
-  EditorContent,
-  EditorEvents,
-  useEditor as useHTMLEditor,
-  Extensions,
-} from "@tiptap/react";
 import React, {
-  KeyboardEventHandler, MouseEventHandler,
+  MouseEventHandler,
   useCallback,
   useEffect,
   useRef,
 } from "react";
+import { ComponentShape } from "@/components/tools";
 import {
   Editor,
   preventDefault,
   stopEventPropagation,
   TEXT_PROPS,
-  TLDefaultSizeStyle,
-  useEditor, useValue,
+  useEditor,
+  useValue,
 } from "tldraw";
-import { ComponentShape } from ".";
-import ImageContent from "./image";
-import { JSONContent } from "./json";
+import {
+  EditorContent,
+  EditorEvents,
+  Extensions,
+  useEditor as useHTMLEditor,
+} from "@tiptap/react";
+import { EditorView } from "@tiptap/pm/view";
+import { all, createLowlight } from "lowlight";
+import Document from "@tiptap/extension-document";
+import Paragraph from "@tiptap/extension-paragraph";
+import Text from "@tiptap/extension-text";
+import History from "@tiptap/extension-history";
+import Bold from "@tiptap/extension-bold";
+import Blockquote from "@tiptap/extension-blockquote";
+import BulletList from "@tiptap/extension-bullet-list";
+import Code from "@tiptap/extension-code";
+import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
+import Dropcursor from "@tiptap/extension-dropcursor";
+import Gapcursor from "@tiptap/extension-gapcursor";
+import HardBreak from "@tiptap/extension-hard-break";
+import Heading from "@tiptap/extension-heading";
+import HorizontalRule from "@tiptap/extension-horizontal-rule";
+import Italic from "@tiptap/extension-italic";
+import Strike from "@tiptap/extension-strike";
+import ListItem from "@tiptap/extension-list-item";
+import OrderedList from "@tiptap/extension-ordered-list";
+import Highlight from "@tiptap/extension-highlight";
+import Typography from "@tiptap/extension-typography";
+import {
+  FONT_SIZES,
+  stopEventPropagationNoZoom,
+} from "@/components/content/shared.ts";
 
 const lowlight = createLowlight(all);
-
-export const FONT_SIZES: Record<TLDefaultSizeStyle, number> = {
-  s: 12,
-  m: 16,
-  l: 22,
-  xl: 38,
-};
 
 // Copied from tldraw rich text.
 // Prevent exiting the editor when hitting Tab.
@@ -142,11 +137,7 @@ const extensions: Extensions = [
   Typography,
 ];
 
-const stopEventPropagationNoZoom = (event: React.WheelEvent) => {
-  if (!event.ctrlKey) event.stopPropagation();
-};
-
-export const EditableContent = React.memo(function Content({
+const EditableContent = React.memo(function Content({
   shape,
   style,
   editable = true,
@@ -206,21 +197,24 @@ export const EditableContent = React.memo(function Content({
   });
 
   const selectToolActive = useValue(
-      'isSelectToolActive',
-      () => editor.getCurrentToolId() === 'select',
-      [editor]
-  )
+    "isSelectToolActive",
+    () => editor.getCurrentToolId() === "select",
+    [editor],
+  );
 
-  const onClick = useCallback<MouseEventHandler<HTMLDivElement>>(e => {
-    if (editor.getCurrentToolId() !== 'select') return ;
-    if (editor.getEditingShapeId() !== shapeId) {
-      editor.setEditingShape(null);
-      editor.setEditingShape(shapeId);
-    }
-    if (e.target === wrapperRef.current) {
-      htmlEditor.commands.focus("end");
-    }
-  }, [htmlEditor, shapeId]);
+  const onClick = useCallback<MouseEventHandler<HTMLDivElement>>(
+    (e) => {
+      if (editor.getCurrentToolId() !== "select") return;
+      if (editor.getEditingShapeId() !== shapeId) {
+        editor.setEditingShape(null);
+        editor.setEditingShape(shapeId);
+      }
+      if (e.target === wrapperRef.current) {
+        htmlEditor.commands.focus("end");
+      }
+    },
+    [htmlEditor, shapeId],
+  );
 
   useEffect(() => {
     if (shape.props.value !== htmlEditor.getHTML())
@@ -267,141 +261,4 @@ export const EditableContent = React.memo(function Content({
   );
 });
 
-function WebsiteContent({ shape }: { shape: ComponentShape }) {
-  return (
-    <div className="w-full h-full p-2 overflow-x-hidden">
-      <iframe
-        srcDoc={String(shape.props.value)}
-        className="w-full h-full border-none rounded-md"
-        sandbox="allow-scripts allow-modals allow-forms"
-      />
-    </div>
-  );
-}
-
-function QueryContent({
-  shape,
-  editable,
-  style,
-  onRun,
-}: {
-  shape: ComponentShape;
-  editable?: boolean;
-  style?: React.CSSProperties;
-  onRun?: () => void;
-}) {
-  const fontSize = FONT_SIZES[shape.props.size];
-  const lineHeight = TEXT_PROPS.lineHeight;
-  const textAreaRef = useRef<HTMLTextAreaElement | null>(null);
-  const editor = useEditor();
-  const onKeyDown = useCallback<KeyboardEventHandler<HTMLTextAreaElement>>(
-    (event) => {
-      if (event.key === "Tab") {
-        event.preventDefault()
-        const textArea = event.target as HTMLTextAreaElement;
-        const start = textArea?.selectionStart;
-        const end = textArea?.selectionEnd;
-        textArea.value = `${textArea.value.substring(0, start)}\t${textArea.value.substring(end)}`;
-        textArea.selectionStart = textArea.selectionEnd = start + 1;
-      } else if (event.key === "Enter" && event.ctrlKey) {
-        event.preventDefault();
-        onRun?.();
-        setTimeout(() => {});
-      }
-    },
-    [editor, onRun],
-  );
-  const onChange = useCallback(
-    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      if (!editable) {
-        return;
-      }
-      editor.updateShape({
-        id: shape.id,
-        type: "component",
-        props: {
-          value: e.target.value,
-        },
-      });
-    },
-    [shape, editor, editable],
-  );
-  return (
-    <div
-      className="w-full h-full overflow-hidden tl-text-wrapper"
-      data-font={shape.props.font}
-      style={{
-        fontSize,
-        lineHeight: Math.floor(fontSize * lineHeight) + "px",
-        minHeight: Math.floor(fontSize * lineHeight) + "px",
-        ...style,
-      }}
-      onContextMenu={stopEventPropagation}
-      onPointerDownCapture={stopEventPropagation}
-      onTouchEnd={stopEventPropagation}
-      onWheelCapture={stopEventPropagationNoZoom}
-      onDragStart={preventDefault}
-    >
-      <textarea
-        ref={textAreaRef}
-        className="w-full h-full bg-(--bg) text-(--fg) overflow-y-scroll tl-rich-text focus:ring-0 border-none rounded-md resize-none"
-        style={{
-          cursor: "var(--tl-cursor-text)",
-        }}
-        value={String(shape.props.value)}
-        onKeyDown={onKeyDown}
-        onChange={onChange}
-        readOnly={!editable}
-      />
-    </div>
-  );
-}
-
-export default React.memo(function Content({
-  shape,
-  loading,
-  canEdit,
-  isEditing,
-  onRun,
-}: {
-  shape: ComponentShape;
-  loading?: boolean;
-  canEdit?: boolean;
-  isEditing?: boolean;
-  onRun?: () => void;
-}) {
-  const readonly = shape.props.readonly;
-  switch (shape.props.component) {
-    case "text":
-    case "instruction":
-      return (
-        <EditableContent
-          shape={shape}
-          editable={!loading && !readonly && canEdit}
-          onRun={onRun}
-        />
-      );
-    case "query":
-      return (
-        <QueryContent
-          shape={shape}
-          editable={!loading && !readonly && canEdit}
-          onRun={onRun}
-        />
-      );
-    case "image":
-      return <ImageContent shape={shape} isEditing={isEditing} />;
-    case "data":
-      return (
-        <JSONContent
-          shape={shape}
-          editable={!loading && !readonly && canEdit}
-          isEditing={isEditing}
-        />
-      );
-    case "website":
-      return <WebsiteContent shape={shape} />;
-    default:
-      return null;
-  }
-});
+export default EditableContent;

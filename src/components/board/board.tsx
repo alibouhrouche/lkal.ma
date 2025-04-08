@@ -1,21 +1,21 @@
 import MainMenu from "@/components/board/main-menu";
 import SharePanel from "@/components/board/share-panel";
-import {Editor, TLComponents, Tldraw} from "tldraw";
+import type {Editor, TLComponents} from "tldraw";
 import { ComponentTool, ComponentUtil } from "../tools";
 import {
   customAssetUrls,
   toolsComponents,
   uiOverrides,
 } from "../tools/ui-overrides";
-import * as Y from "yjs";
 import { useYjsStore } from "@/hooks/useYjsStore";
 import { useTheme } from "next-themes";
 import AppEvents from "./app-events";
 import ContextMenu from "./context-menu";
 import { cn } from "@/lib/utils";
-import React, {useCallback} from "react";
+import React, {lazy, useCallback} from "react";
 import embeds from "@/components/embeds";
 import TopPanel from "@/components/board/TopPanel.tsx";
+const Tldraw = lazy(() => import("./tldraw.tsx"));
 
 const components: TLComponents = {
   // Define your components here
@@ -30,16 +30,13 @@ const shapeUtils = [ComponentUtil];
 const tools = [ComponentTool];
 
 export default function TldrawBoard({
-  doc,
   canEdit,
   children,
 }: {
-  doc: Y.Doc;
   canEdit?: boolean;
   children?: React.ReactNode;
 }) {
   const storeWithStatus = useYjsStore({
-    doc,
     shapeUtils,
   });
   const { theme, resolvedTheme, setTheme } = useTheme();

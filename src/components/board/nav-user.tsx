@@ -63,6 +63,9 @@ export default function NavUser({ user }: { user: UserLogin }) {
         <a href="/boards">
           <DropdownMenuItem>Boards</DropdownMenuItem>
         </a>
+        <a href="/docs">
+          <DropdownMenuItem>Docs</DropdownMenuItem>
+        </a>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => logout()}>Logout</DropdownMenuItem>
       </DropdownMenuContent>

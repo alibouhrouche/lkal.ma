@@ -1,0 +1,26 @@
+---
+title: Text Component
+---
+import { Picture } from "astro:assets";
+import textComponent from "../../../assets/text-comp.jpg";
+import textExample from "../../../assets/text-comp-example.jpg";
+
+<Picture
+    formats={['avif', 'webp']}
+    src={textComponent}
+    alt="Text Component"
+/>
+
+This component has two working modes:
+1. As a text input (if it doesn't have placeholders)
+2. As a template (if it contains placeholders)
+
+If an unnamed input is present it's output is used as the value.
+
+Examples:
+
+<Picture
+    formats={['avif', 'webp']}
+    src={textExample}
+    alt="Text Component Example"
+/>

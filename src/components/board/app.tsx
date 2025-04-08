@@ -6,8 +6,8 @@ import { AppTitle } from "./app-title";
 import { useRoute } from "wouter";
 import {LoadingFallback, Spinner} from "../loading";
 import AppStatus from "./app-status.tsx";
-import {lazy, Suspense} from "react";
-const AppBoard = lazy(() => import("./app-board"));
+import {Suspense} from "react";
+import AppBoard from "@/components/board/app-board.tsx";
 
 export default function App() {
   const defaultOpen = localStorage.getItem("sidebar_state") === "true";

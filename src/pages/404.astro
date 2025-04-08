@@ -16,11 +16,11 @@ import { ArrowLeft } from "lucide-react";
           </a>
         </div>
         <div class="sm:absolute sm:left-1/2 transform sm:-translate-x-1/2">
-          <SyncStatus client:only />
+          <SyncStatus client:only="react" />
         </div>
         <div class="flex gap-4 items-center">
           <ModeToggle />
-          <LoginButton client:only />
+          <LoginButton client:only="react" />
         </div>
       </div>
       <div class="flex flex-col items-center justify-center h-full space-y-4">

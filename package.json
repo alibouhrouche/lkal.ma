@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@astrojs/react": "4.2.3",
+    "@astrojs/starlight": "0.32.6",
     "@icons-pack/react-simple-icons": "^12.3.0",
     "@radix-ui/react-accordion": "^1.2.3",
     "@radix-ui/react-alert-dialog": "^1.1.6",

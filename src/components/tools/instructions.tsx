@@ -1,7 +1,7 @@
-import { Editor, stopEventPropagation, useEditor } from "tldraw";
+import { Editor, stopEventPropagation } from "tldraw";
 import { ComponentConfigText, ComponentShape } from ".";
 import models from "./text-models.json";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import {
   BrainIcon,
   ComponentIcon,
@@ -10,7 +10,6 @@ import {
   SpeechIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Button } from "../ui/button";
 
 export const defaultConfig = {
   type: "text",
@@ -21,7 +20,6 @@ export const defaultConfig = {
 } as const;
 
 export default function InstructionConfig({
-  editor,
   data,
   setData,
   shape,

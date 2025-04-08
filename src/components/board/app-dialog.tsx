@@ -1,6 +1,5 @@
 import {
   Editor,
-  TLDefaultShape,
   TldrawUiButton,
   TldrawUiButtonLabel,
   TldrawUiDialogBody,
@@ -10,17 +9,15 @@ import {
   TldrawUiDialogTitle,
   useEditor,
 } from "tldraw";
-import { DialogDescription, DialogHeader, DialogTitle } from "../ui/dialog";
 import {
   ComponentConfig,
   ComponentConfigImage,
   ComponentConfigText,
   ComponentShape,
-  ComponentShapeProps,
 } from "../tools";
 import InstructionConfig from "../tools/instructions";
 import { ImageConfig } from "../tools/image";
-import { useState } from "react";
+import React, { useState } from "react";
 import {
   defaultImageConfig,
   defaultInstructionConfig,
@@ -36,8 +33,8 @@ type ShapeConfigProps = {
 const dataType = <T extends ComponentConfig>(
   shape: ComponentShape,
   component: string,
-  data: ComponentConfig
-): data is T => shape.props.component === component;
+  _data: ComponentConfig
+): _data is T => shape.props.component === component;
 
 function ShapeConfig({ data, setData, shape, editor }: ShapeConfigProps) {
   if (!shape || shape.type !== "component") return null;
@@ -94,7 +91,7 @@ export default function AppDialog({
         <TldrawUiDialogTitle>Edit AI Settings</TldrawUiDialogTitle>
         <TldrawUiDialogCloseButton />
       </TldrawUiDialogHeader>
-      <TldrawUiDialogBody style={{ maxWidth: 350 }}>
+      <TldrawUiDialogBody className="max-w-full w-[450px]">
         {data ? (
           <ShapeConfig
             editor={editor}

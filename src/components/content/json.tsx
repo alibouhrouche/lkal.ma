@@ -1,10 +1,10 @@
 import { JsonEditor, githubDarkTheme, githubLightTheme } from "json-edit-react";
-import { ComponentShape } from ".";
+import { ComponentShape } from "../tools";
 import { useTheme } from "next-themes";
 import { preventDefault, stopEventPropagation, useEditor } from "tldraw";
 import React from "react";
 
-export const JSONContent = React.memo(function JSONContent({
+export default React.memo(function JSONContent({
   shape,
   editable,
 }: {

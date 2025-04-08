@@ -1,5 +1,4 @@
 import { db } from "@/db";
-import React from "react";
 import { AspectRatio } from "../ui/aspect-ratio";
 import { FilePlus2Icon, PlusCircleIcon } from "lucide-react";
 import { SidebarMenuButton } from "../ui/sidebar";

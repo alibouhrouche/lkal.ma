@@ -22,7 +22,7 @@ export const print = async (editor: Editor) => {
     return;
   }
     const html = `<!doctype html>
-<html>
+<html lang="en">
 <head>
     <meta charset="utf-8">
     <title>Print</title>

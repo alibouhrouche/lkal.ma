@@ -4,12 +4,15 @@ import react from "@astrojs/react";
 import tailwindcss from "@tailwindcss/vite";
 import AstroPWA from "@vite-pwa/astro";
 
+import starlight from "@astrojs/starlight";
+
 const ReactCompilerConfig = {
   /* ... */
 };
 
 // https://astro.build/config
 export default defineConfig({
+  site: "https://lkal.ma",
   output: process.env.NODE_ENV === "production" ? "static" : "server",
   prefetch: true,
   integrations: [
@@ -22,7 +25,7 @@ export default defineConfig({
       registerType: "prompt",
       strategies: "injectManifest",
       injectManifest: {
-        maximumFileSizeToCacheInBytes: 5000000
+        maximumFileSizeToCacheInBytes: 5000000,
       },
       srcDir: "src",
       filename: "sw.ts",
@@ -122,6 +125,15 @@ export default defineConfig({
         theme_color: "#2d9145",
         background_color: "#2d9145",
         display: "standalone",
+      },
+    }),
+    starlight({
+      title: "Lkal.ma",
+      disable404Route: true,
+      logo: {
+        src: "@/assets/logo.svg",
+        alt: "Lkal.ma Logo",
+        replacesTitle: true,
       },
     }),
   ],

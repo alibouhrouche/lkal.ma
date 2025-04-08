@@ -115,6 +115,7 @@ export default function AppAssets({ onClose }: { onClose(): void }) {
                       "w-full h-auto max-h-72 min-h-64 object-cover rounded-md border border-gray-200 dark:border-gray-700",
                       selected?.includes(asset.id) && "opacity-50"
                     )}
+                    alt="Image Asset"
                   />
                 )}
                 {asset.type === "bookmark" && (

@@ -11,19 +11,24 @@ import { SyncStatus } from "@/components/sync-status";
 <Layout title="Boards">
   <div>
     <div class="w-full h-16 bg-card flex items-center p-4 justify-between">
-      <a href="/" class="relative flex gap-4 items-center">
-        <Logo />
-        <div class="text-2xl">Boards</div>
-      </a>
+      <div class="flex items-center gap-2">
+        <a href="/" class="relative flex gap-4 items-center">
+          <Logo />
+          <div class="text-2xl">Boards</div>
+        </a>
+        <a href="/docs" class="text-blue-500">
+          Docs
+        </a>
+      </div>
       <div class="sm:absolute sm:left-1/2 transform sm:-translate-x-1/2">
-        <SyncStatus client:only />
+        <SyncStatus client:only="react" />
       </div>
       <div class="flex gap-4 items-center">
         <ModeToggle client:load />
-        <LoginButton client:only />
+        <LoginButton client:only="react" />
       </div>
     </div>
-    <BoardsGrid client:only>
+    <BoardsGrid client:only="react">
       <Loading slot="fallback" />
     </BoardsGrid>
   </div>

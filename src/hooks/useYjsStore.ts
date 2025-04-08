@@ -18,17 +18,19 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import { YKeyValue } from "y-utility/y-keyvalue";
 import * as Y from "yjs";
-import { DexieYProvider } from "dexie";
 import { assetsStore } from "@/db";
+import {DexieYProvider} from "dexie";
+import {useBoard} from "@/components/board/board-context.ts";
 
 // Modified from https://github.com/tldraw/tldraw-yjs-example/blob/main/src/useYjsStore.ts
 export function useYjsStore({
-  doc,
   shapeUtils = [],
 }: Partial<{
   version: number;
   shapeUtils: TLAnyShapeUtilConstructor[];
-}> & { doc: Y.Doc }) {
+}>) {
+  const { board: {doc} } = useBoard();
+
   const [storeWithStatus, setStoreWithStatus] = useState<TLStoreWithStatus>({
     status: "loading",
   });
@@ -52,12 +54,10 @@ export function useYjsStore({
       shapeUtils: [...defaultShapeUtils, ...shapeUtils],
       assets: assetsStore,
     });
-    const unsubs: (() => void)[] = [];
+    const unsub: (() => void)[] = [];
     const room = DexieYProvider.load(yDoc);
-    unsubs.push(() => {
-      DexieYProvider.release(yDoc, {
-        gracePeriod: 100, // Grace period to optimize for unload/reload scenarios
-      });
+    unsub.push(() => {
+      DexieYProvider.release(yDoc);
       // room.awareness.setLocalState(null);
     });
 
@@ -67,7 +67,7 @@ export function useYjsStore({
       () => {
         room.awareness.setLocalState(null);
       },
-      { signal: abortController.signal }
+      { signal: abortController.signal },
     );
 
     function handleSync() {
@@ -77,7 +77,7 @@ export function useYjsStore({
       /* -------------------- Document -------------------- */
 
       // Sync store changes to the yjs doc
-      unsubs.push(
+      unsub.push(
         store.listen(
           function syncStoreChangesToYjsDoc({ changes }) {
             yDoc.transact(() => {
@@ -94,8 +94,8 @@ export function useYjsStore({
               });
             });
           },
-          { source: "user", scope: "document" } // only sync user's document changes
-        )
+          { source: "user", scope: "document" }, // only sync user's document changes
+        ),
       );
 
       // Sync the yjs doc changes to the store
@@ -106,7 +106,7 @@ export function useYjsStore({
           | { action: "update"; oldValue: TLRecord; newValue: TLRecord }
           | { action: "add"; newValue: TLRecord }
         >,
-        transaction: Y.Transaction
+        transaction: Y.Transaction,
       ) => {
         if (transaction.local) return;
 
@@ -143,7 +143,7 @@ export function useYjsStore({
               const migrationResult = store.schema.migrateStoreSnapshot({
                 schema: theirSchema,
                 store: Object.fromEntries(
-                  toPut.map((record) => [record.id, record])
+                  toPut.map((record) => [record.id, record]),
                 ),
               });
               if (migrationResult.type === "error") {
@@ -161,7 +161,7 @@ export function useYjsStore({
                   }
                 }
                 for (const r of Object.values(
-                  migrationResult.value
+                  migrationResult.value,
                 ) as TLRecord[]) {
                   yStore.set(r.id, r);
                 }
@@ -169,8 +169,8 @@ export function useYjsStore({
               });
               store.put(
                 Object.entries(migrationResult.value).map(
-                  ([, record]) => record
-                )
+                  ([, record]) => record,
+                ),
               );
             }
           }
@@ -178,7 +178,7 @@ export function useYjsStore({
       };
 
       yStore.on("change", handleChange);
-      unsubs.push(() => yStore.off("change", handleChange));
+      unsub.push(() => yStore.off("change", handleChange));
 
       /* -------------------- Awareness ------------------- */
 
@@ -202,20 +202,20 @@ export function useYjsStore({
       const presenceId = InstancePresenceRecordType.createId(yClientId);
       const presenceDerivation = createPresenceStateDerivation(
         userPreferences,
-        presenceId
+        presenceId,
       )(store);
 
       // Set our initial presence from the derivation's current value
       room.awareness.setLocalStateField("presence", presenceDerivation.get());
 
       // When the derivation change, sync presence to to yjs awareness
-      unsubs.push(
+      unsub.push(
         react("when presence changes", () => {
           const presence = presenceDerivation.get();
           requestAnimationFrame(() => {
             room.awareness.setLocalStateField("presence", presence);
           });
-        })
+        }),
       );
 
       // Sync yjs awareness changes to the store
@@ -249,7 +249,7 @@ export function useYjsStore({
 
         for (const clientId of update.removed) {
           toRemove.push(
-            InstancePresenceRecordType.createId(clientId.toString())
+            InstancePresenceRecordType.createId(clientId.toString()),
           );
         }
 
@@ -261,7 +261,7 @@ export function useYjsStore({
       };
 
       room.awareness.on("update", handleUpdate);
-      unsubs.push(() => room.awareness.off("update", handleUpdate));
+      unsub.push(() => room.awareness.off("update", handleUpdate));
 
       // 2.
       // Initialize the store with the yjs doc records—or, if the yjs doc
@@ -279,7 +279,7 @@ export function useYjsStore({
         const migrationResult = store.schema.migrateStoreSnapshot({
           schema: theirSchema,
           store: Object.fromEntries(
-            records.map((record) => [record.id, record])
+            records.map((record) => [record.id, record]),
           ),
         });
         if (migrationResult.type === "error") {
@@ -323,6 +323,7 @@ export function useYjsStore({
         connectionStatus: "online",
       });
     }
+
     room.whenLoaded.then(() => {
       handleSync();
     });
@@ -334,8 +335,8 @@ export function useYjsStore({
     return () => {
       room.awareness.setLocalState(null);
       abortController.abort();
-      unsubs.forEach((fn) => fn());
-      unsubs.length = 0;
+      unsub.forEach((fn) => fn());
+      unsub.length = 0;
     };
   }, [yDoc, yStore, meta]);
 

@@ -1,0 +1,14 @@
+---
+title: Image Component
+---
+
+import { Picture } from "astro:assets";
+import imageComponent from "../../../assets/image-comp.jpg"
+
+<Picture
+    formats={['avif', 'webp']}
+    src={imageComponent}
+    alt="Image Component"
+/>
+
+This component generate images using the pollinations.ai API, the parameters can be configured using the settings icon.

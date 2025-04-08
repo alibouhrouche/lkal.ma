@@ -76,7 +76,7 @@ export function ImageConfig({
                   width: parseInt(e.target.value),
                 }));
               }}
-              className="h-10 w-20 rounded-sm border-gray-200 sm:text-sm dark:border-gray-700 bg-background text-foreground focus:ring-primary"
+              className="h-10 w-full rounded-sm border-gray-200 sm:text-sm dark:border-gray-700 bg-background text-foreground focus:ring-primary"
             />
           </div>
           <div className="flex w-full max-w-sm items-center gap-1.5">
@@ -92,7 +92,7 @@ export function ImageConfig({
                   height: parseInt(e.target.value),
                 }));
               }}
-              className="h-10 w-20 rounded-sm border-gray-200 sm:text-sm dark:border-gray-700 bg-background text-foreground focus:ring-primary"
+              className="h-10 w-full rounded-sm border-gray-200 sm:text-sm dark:border-gray-700 bg-background text-foreground focus:ring-primary"
             />
           </div>
         </div>
