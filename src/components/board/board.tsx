@@ -15,6 +15,7 @@ import { cn } from "@/lib/utils";
 import React, {lazy, useCallback} from "react";
 import embeds from "@/components/embeds";
 import TopPanel from "@/components/board/TopPanel.tsx";
+import {useRouter} from "next/router";
 const Tldraw = lazy(() => import("./tldraw.tsx"));
 
 const components: TLComponents = {
@@ -36,6 +37,7 @@ export default function TldrawBoard({
   canEdit?: boolean;
   children?: React.ReactNode;
 }) {
+  const router = useRouter();
   const storeWithStatus = useYjsStore({
     shapeUtils,
   });
@@ -63,8 +65,8 @@ export default function TldrawBoard({
         resolvedTheme === "dark"
           ? "tl-theme__dark"
           : resolvedTheme === "light"
-          ? "tl-theme__light"
-          : ""
+            ? "tl-theme__light"
+            : "",
       )}
       onMount={handleMount}
       onUiEvent={(name, data) => {
@@ -72,7 +74,11 @@ export default function TldrawBoard({
           setTheme((data as { value: string }).value);
         }
       }}
-      deepLinks
+      deepLinks={{
+        onChange(url: URL) {
+          router.replace(url);
+        },
+      }}
     >
       <AppEvents />
       {children}

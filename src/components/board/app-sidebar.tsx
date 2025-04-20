@@ -13,10 +13,10 @@ import { ArrowLeftIcon } from "lucide-react";
 import { Virtuoso } from "react-virtuoso";
 import { useApp } from "./context";
 import { NewBoardLink } from "./app-new";
-import { prefetch } from "astro:prefetch";
+import Link from "next/link";
 
 function BoardsList() {
-  const id = useApp().id!;
+  const id = useApp().id;
   const boards = useLiveQuery(() =>
     db.boards.orderBy("created_at").reverse().toArray()
   );
@@ -37,20 +37,16 @@ function BoardsList() {
   );
 }
 
-const prefetchBoards = () => {
-  prefetch("/boards");
-}
-
 export function AppSidebar() {
   return (
     <Sidebar>
       <SidebarHeader className="flex flex-row items-center justify-between">
-        <a href="/boards" className="w-full" onMouseOver={prefetchBoards}>
+        <Link href="/boards" className="w-full">
           <SidebarMenuButton className="cursor-pointer">
             <ArrowLeftIcon size={24} />
             <span>See all</span>
           </SidebarMenuButton>
-        </a>
+        </Link>
         <NewBoardLink />
       </SidebarHeader>
       <SidebarContent>

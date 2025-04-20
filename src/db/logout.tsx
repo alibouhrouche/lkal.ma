@@ -49,7 +49,7 @@ export function logout(fromLogout?: boolean) {
 }
 
 const dbLink =
-    (import.meta.env.PUBLIC_DEXIE_CLOUD_DB_URL! || '')
+    (process.env.NEXT_PUBLIC_DEXIE_CLOUD_DB_URL! || '')
       .split('//')[1]
       ?.split('.')[0] || ''
 

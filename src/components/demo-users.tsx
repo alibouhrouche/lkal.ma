@@ -13,12 +13,14 @@ import { db } from "@/db";
 import { useCallback, useState } from "react";
 // import { useNavigate } from "react-router";
 import { toast } from "sonner";
+import {useRouter} from "next/router";
 
 const { demoUsers } = demo;
 
 export default function DemoUsers() {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState("");
+  const router = useRouter();
   // const navigate = useNavigate();
   const demoLogin = useCallback((email: string) => {
     setLoading(email);
@@ -34,9 +36,9 @@ export default function DemoUsers() {
       .then(() => {
         setLoading("");
         setOpen(false);
-        location.href = "/boards";
+        router.push("/boards");
       });
-  }, []);
+  }, [router]);
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -82,7 +84,7 @@ export default function DemoUsers() {
             className="cursor-pointer rounded-full text-base"
             onClick={() => {
               setOpen(false);
-              location.href = "/boards";
+              router.push("/boards");
             }}
           >
             Continue without an account

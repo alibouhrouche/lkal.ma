@@ -1,16 +1,10 @@
-import { db } from "@/db";
 import { AspectRatio } from "../ui/aspect-ratio";
 import { FilePlus2Icon, PlusCircleIcon } from "lucide-react";
 import { SidebarMenuButton } from "../ui/sidebar";
-import { navigate } from "wouter/use-browser-location";
-
-export const newBoard = () => {
-  db.newBoard().then((id) => {
-    location.href = `/b/${id}`;
-  });
-};
+import useNewBoard from "@/hooks/useNewBoard.ts";
 
 export const NewBoard = () => {
+  const newBoard = useNewBoard();
   return (
     <div className="cursor-pointer rounded-xl" onClick={newBoard}>
       <AspectRatio
@@ -25,15 +19,10 @@ export const NewBoard = () => {
   );
 };
 
-export const newBoardRouter = () => {
-  db.newBoard().then((id) => {
-    navigate(`/b/${id}`);
-  });
-}
-
 export const NewBoardLink = () => {
+  const newBoard = useNewBoard();
   return (
-    <div onClick={newBoardRouter} className="w-full">
+    <div onClick={newBoard} className="w-full">
       <SidebarMenuButton className="cursor-pointer flex justify-end">
         <FilePlus2Icon size={24} />
         <span>New</span>

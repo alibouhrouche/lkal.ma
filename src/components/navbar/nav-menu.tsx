@@ -5,28 +5,29 @@ import {
   NavigationMenuList,
 } from "@/components/ui/navigation-menu";
 import { NavigationMenuProps } from "@radix-ui/react-navigation-menu";
+import Link from "next/link";
 
 export const NavMenu = (props: NavigationMenuProps) => (
   <NavigationMenu {...props}>
     <NavigationMenuList className="gap-6 space-x-0 data-[orientation=vertical]:flex-col data-[orientation=vertical]:items-start">
       <NavigationMenuItem>
         <NavigationMenuLink asChild>
-          <a href="/">Home</a>
+          <Link href="/">Home</Link>
         </NavigationMenuLink>
       </NavigationMenuItem>
       <NavigationMenuItem>
         <NavigationMenuLink asChild>
-          <a href="#features">Features</a>
+          <Link href="#features">Features</Link>
         </NavigationMenuLink>
       </NavigationMenuItem>
       <NavigationMenuItem>
         <NavigationMenuLink asChild>
-          <a href="#faq">FAQ</a>
+          <Link href="#faq">FAQ</Link>
         </NavigationMenuLink>
       </NavigationMenuItem>
       <NavigationMenuItem>
         <NavigationMenuLink asChild>
-          <a href="/docs">Docs</a>
+          <Link href="/docs">Docs</Link>
         </NavigationMenuLink>
       </NavigationMenuItem>
     </NavigationMenuList>

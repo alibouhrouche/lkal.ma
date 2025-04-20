@@ -4,12 +4,15 @@ import { useLiveQuery } from "dexie-react-hooks";
 import "tldraw/tldraw.css";
 import NotFound from "../NotFound";
 import { useApp } from "./context";
-import { Loading } from "../loading";
 import { BoardContext, useBoard } from "@/components/board/board-context.ts";
 import { useBoardPermissions } from "@/hooks/usePermissions.ts";
-import { lazy } from "react";
+import Head from "next/head";
+import { AppTitle } from "@/components/board/app-title.tsx";
+import dynamic from "next/dynamic";
 
-const TldrawBoard = lazy(() => import("./board"));
+const TldrawBoard = dynamic(() => import("@/components/board/board.tsx"), {
+  ssr: false,
+});
 
 function BoardWrapper() {
   const board = useBoard().board;
@@ -27,11 +30,16 @@ export default function AppBoard() {
   }
 
   if (!board) {
-    return <Loading />;
+    return (
+      <Head>
+        <title key="title">Loading... - Lkal.ma</title>
+      </Head>
+    );
   }
 
   return (
     <BoardContext value={{ board }}>
+      <AppTitle />
       <BoardWrapper />
     </BoardContext>
   );

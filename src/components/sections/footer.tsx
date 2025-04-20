@@ -20,10 +20,7 @@ const Footer = () => {
         {/* Copyright */}
         <span className="text-muted-foreground">
           &copy; {new Date().getFullYear()}{" "}
-          <a href="https://ali.js.org" target="_blank">
-            Ali Bouhrouche
-          </a>
-          . All rights reserved.
+          <a href="https://iev.digital" target="_blank">IEV Digital Ltd</a>. All rights reserved.
         </span>
 
         <div className="flex items-center gap-5 text-muted-foreground">
@@ -32,9 +29,6 @@ const Footer = () => {
           </a>
           <a href="https://www.instagram.com/lkal.ma" target="_blank">
             <SiInstagram className="h-5 w-5" />
-          </a>
-          <a href="https://github.com/alibouhrouche/lkal.ma" target="_blank">
-            <SiGithub className="h-5 w-5" />
           </a>
         </div>
       </div>

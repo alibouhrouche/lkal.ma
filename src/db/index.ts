@@ -45,15 +45,10 @@ class DB extends Dexie {
       roles: "[realmId+name]",
     });
     this.cloud.configure({
-      databaseUrl: import.meta.env.PUBLIC_DEXIE_CLOUD_DB_URL!,
-      // Enable Y.js awareness
+      databaseUrl: process.env.NEXT_PUBLIC_DEXIE_CLOUD_DB_URL!,
       awarenessProtocol: awarenessProtocol,
       customLoginGui: true,
       requireAuth: false,
-      tryUseServiceWorker: true,
-      periodicSync: {
-        minInterval: 60 * 60 * 1000,
-      },
     });
   }
   getBoard(id: string) {

@@ -1,12 +1,13 @@
-/* eslint-disable @next/next/no-img-element */
 import { Button } from "@/components/ui/button";
 import { ArrowUpRight, FilePlus2Icon } from "lucide-react";
 import DemoUsers from "../demo-users";
 import { db } from "@/db";
 import { useObservable } from "dexie-react-hooks";
-import { newBoard } from "../board/app-new";
+import Link from "next/link";
+import useNewBoard from "@/hooks/useNewBoard.ts";
 
 const HeroButtons = () => {
+  const newBoard = useNewBoard();
   const user = useObservable(() => db.cloud.currentUser, []);
   if (user?.isLoggedIn) {
     return (
@@ -16,9 +17,9 @@ const HeroButtons = () => {
           className="cursor-pointer rounded-full text-base"
           asChild
         >
-          <a href="/boards">
+          <Link href="/boards">
             Get Started <ArrowUpRight className="!h-5 !w-5" />
-          </a>
+          </Link>
         </Button>
         <Button
           size="lg"
@@ -26,9 +27,7 @@ const HeroButtons = () => {
           className="cursor-pointer rounded-full text-base"
           onClick={newBoard}
         >
-          <FilePlus2Icon
-            className="!h-5 !w-5"
-          />
+          <FilePlus2Icon className="!h-5 !w-5" />
           New Board
         </Button>
       </>

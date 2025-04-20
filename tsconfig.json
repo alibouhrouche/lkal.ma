@@ -6,7 +6,7 @@
       "ES2020",
       "DOM",
       "DOM.Iterable",
-      "webworker",
+      "webworker"
     ],
     "module": "ESNext",
     "esModuleInterop": true,
@@ -16,7 +16,7 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
-    "jsx": "react-jsx",
+    "jsx": "preserve",
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
@@ -38,7 +38,7 @@
     "types": [
       "vite-plugin-pwa/info",
       "vite-plugin-pwa/client",
-      "vite-plugin-pwa/react",
+      "vite-plugin-pwa/react"
     ],
     "jsxImportSource": "react"
   },
@@ -46,6 +46,7 @@
     "./dist/types/**/*.ts",
     "./env.d.ts",
     "./src",
+    "./worker",
   ],
   "exclude": [
     "./node_modules",

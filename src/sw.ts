@@ -1,25 +1,41 @@
-import "dexie-cloud-addon/service-worker";
+import { defaultCache } from "@serwist/next/worker";
+import type { PrecacheEntry, SerwistGlobalConfig } from "serwist";
+import { NavigationRoute, RegExpRoute, Serwist, StaleWhileRevalidate } from "serwist";
 import { db, userPromise } from "./db";
-import { NavigationRoute, registerRoute } from "workbox-routing";
-import { StaleWhileRevalidate } from "workbox-strategies";
-import {
-  cleanupOutdatedCaches,
-  createHandlerBoundToURL,
-  precacheAndRoute,
-} from "workbox-precaching";
 
-declare let self: ServiceWorkerGlobalScope;
-self.addEventListener("message", (event) => {
-  if (event.data && event.data.type === "SKIP_WAITING") self.skipWaiting();
-});
-cleanupOutdatedCaches();
+declare global {
+  interface WorkerGlobalScope extends SerwistGlobalConfig {
+    // Change this attribute's name to your `injectionPoint`.
+    // `injectionPoint` is an InjectManifest option.
+    // See https://serwist.pages.dev/docs/build/configuring
+    __SW_MANIFEST: (PrecacheEntry | string)[] | undefined;
+  }
+}
+
+declare const self: ServiceWorkerGlobalScope;
+
+const isProd = process.env.NODE_ENV === "production";
+const networkFallback = ({ request }: { request: Request }) => fetch(request);
 
 const boardView = /\/b\/([^/]+?)\/?$/i;
 const boardAssets = /\/b\/([^/]+?)\/(asset:[^/]+?)\/?$/i;
 
-const networkFallback = ({ request }: { request: Request }) => fetch(request);
+const serwist = new Serwist({
+  precacheEntries: self.__SW_MANIFEST,
+  skipWaiting: true,
+  clientsClaim: true,
+  navigationPreload: false,
+});
 
-registerRoute("/", async (props) => {
+const boards = isProd
+  ? serwist.createHandlerBoundToUrl("/b/[id].html")
+  : networkFallback;
+
+const homepage = isProd
+  ? serwist.createHandlerBoundToUrl("index.html")
+  : networkFallback;
+
+serwist.registerCapture("/", async (props) => {
   const user = await userPromise();
   if (user?.isLoggedIn) {
     return new Response(null, {
@@ -32,18 +48,11 @@ registerRoute("/", async (props) => {
   return homepage(props);
 });
 
-precacheAndRoute(self.__WB_MANIFEST);
+serwist.registerRoute(new NavigationRoute(boards, {
+  allowlist: [boardView],
+}));
 
-const boards = import.meta.env.PROD
-  ? createHandlerBoundToURL("/b")
-  : networkFallback;
-registerRoute(boardView, boards);
-
-const homepage = import.meta.env.PROD
-  ? createHandlerBoundToURL("/")
-  : networkFallback;
-
-registerRoute(boardAssets, async ({ url, params }) => {
+serwist.registerRoute(new RegExpRoute(boardAssets, async ({ url, params }) => {
   const [id, assetId] = (
     Array.isArray(params) ? params : boardAssets.exec(url.pathname)?.slice(1)
   ) as [string, string];
@@ -53,9 +62,9 @@ registerRoute(boardAssets, async ({ url, params }) => {
     return new Response("Not found", { status: 404 });
   }
   return new Response(file);
-});
+}));
 
-registerRoute(
+serwist.registerCapture(
   ({ url }) => {
     return url.host === "image.pollinations.ai";
   },
@@ -68,7 +77,7 @@ registerRoute(
   }),
 );
 
-registerRoute(
+serwist.registerCapture(
   ({ request, url }) => {
     return request.destination === "image" && url.host === "gravatar.com";
   },
@@ -77,8 +86,10 @@ registerRoute(
   }),
 );
 
-registerRoute(
+serwist.registerCapture(
   new NavigationRoute(
-    import.meta.env.PROD ? createHandlerBoundToURL("/404") : networkFallback,
+    isProd ? serwist.createHandlerBoundToUrl("/404") : networkFallback,
   ),
 );
+
+serwist.addEventListeners();

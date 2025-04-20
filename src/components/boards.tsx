@@ -46,7 +46,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { NuqsAdapter } from "nuqs/adapters/react";
+import { NuqsAdapter } from "nuqs/adapters/next/pages";
 import { parseAsArrayOf, parseAsString, useQueryState } from "nuqs";
 import { Spinner } from "./loading";
 import { NewBoard } from "./board/app-new";
@@ -65,7 +65,7 @@ const List = forwardRef<HTMLDivElement, HtmlHTMLAttributes<HTMLDivElement>>(
     >
       {children}
     </div>
-  )
+  ),
 );
 
 List.displayName = "List";
@@ -98,7 +98,6 @@ const ItemWrapper = ({
     {children}
   </AspectRatio>
 );
-
 
 function AddBoardToCollection({
   collections,
@@ -171,7 +170,7 @@ function AddBoardToCollection({
                   const boards =
                     (await db.spaces.get(selectedCollection!))?.boards ?? [];
                   const filter = boards.filter(
-                    (id) => !selectedBoards.includes(id)
+                    (id) => !selectedBoards.includes(id),
                   );
                   db.spaces.update(selectedCollection!, {
                     boards: [...filter, ...selectedBoards],
@@ -225,18 +224,18 @@ function BoardsCollections({
                   db.spaces.bulkUpdate(
                     collections
                       ?.filter((collection) =>
-                        selectedCollectionsIds.includes(collection.id)
+                        selectedCollectionsIds.includes(collection.id),
                       )
                       .map((collection) => {
                         return {
                           key: collection.id,
                           changes: {
                             boards: collection.boards?.filter(
-                              (id) => !selectedBoards.includes(id)
+                              (id) => !selectedBoards.includes(id),
                             ),
                           },
                         };
-                      }) ?? []
+                      }) ?? [],
                   );
                   setSelectedBoards([]);
                 }
@@ -304,7 +303,7 @@ const GridItem = React.memo(function GridItem({
               setSelectedBoards((prev) =>
                 checked
                   ? [...prev, board.id]
-                  : prev.filter((id) => id !== board.id)
+                  : prev.filter((id) => id !== board.id),
               );
             }}
           />
@@ -349,16 +348,16 @@ const VirtualGrid = React.memo(function VirtualGrid({
 function BoardsGrid() {
   const [selectedCollectionsIds, setSelectedCollectionsIds] = useQueryState(
     "c",
-    parseAsArrayOf(parseAsString).withDefault([])
+    parseAsArrayOf(parseAsString).withDefault([]),
   );
   const [selectedBoards, setSelectedBoards] = useState<string[]>([]);
   const boards = useLiveQuery(
     () => db.boards.orderBy("created_at").reverse().toArray(),
-    []
+    [],
   );
   const selectedCollections = useLiveQuery(
     () => db.spaces.where("id").anyOf(selectedCollectionsIds).toArray(),
-    [selectedCollectionsIds]
+    [selectedCollectionsIds],
   );
   const data = useMemo(() => {
     if (!boards) {
@@ -368,7 +367,7 @@ function BoardsGrid() {
       return [{} as Board, ...boards];
     }
     const boardsIds = selectedCollections.flatMap(
-      (collection) => collection.boards ?? []
+      (collection) => collection.boards ?? [],
     );
     const ret = boards.filter((board) => {
       return boardsIds.includes(board.id);

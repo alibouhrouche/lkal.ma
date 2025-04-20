@@ -1,13 +1,9 @@
-import { db } from "@/db"
-import { useLiveQuery } from "dexie-react-hooks"
-import { useApp } from "./context";
-import { useEffect } from "react";
+import {useBoard} from "@/components/board/board-context.ts";
+import Head from "next/head";
 
 export const AppTitle = () => {
-    const id = useApp().id;
-    const boardTitle = useLiveQuery(() => db.boards.get(id, b => b?.name ?? "Not Found"), [id]);
-    useEffect(() => {
-        document.title = `${boardTitle ?? "loading..."} - Lkal.ma`
-    }, [boardTitle])
-    return null
+    const board = useBoard();
+    return <Head>
+        <title>{`${board.board.name ?? "Loading..."} - Lkal.ma`}</title>
+    </Head>
 }

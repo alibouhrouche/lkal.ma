@@ -3,16 +3,18 @@ import {
   EditSubmenu,
   ExportFileContentSubMenu,
   ExtrasGroup,
-  PreferencesGroup, PrintItem,
+  PreferencesGroup,
+  PrintItem,
   TldrawUiMenuGroup,
   TldrawUiMenuItem,
-  useDialogs, ViewSubmenu,
+  useDialogs,
+  ViewSubmenu,
 } from "tldraw";
 import { useSidebar } from "../ui/sidebar";
 import { PanelLeftIcon } from "lucide-react";
 import { db } from "@/db";
-import { navigate } from "wouter/use-browser-location";
 import AppAssets from "./app-assets";
+import { useRouter } from "next/router";
 
 function SidebarTrigger() {
   const { toggleSidebar } = useSidebar();
@@ -47,6 +49,7 @@ function AssetsList() {
 }
 
 export default function MainMenu() {
+  const router = useRouter();
   return (
     <div className="flex items-center justify-between w-full">
       <SidebarTrigger />
@@ -57,7 +60,7 @@ export default function MainMenu() {
           icon="plus"
           onSelect={() => {
             db.newBoard().then((id) => {
-              navigate(`/b/${id}`);
+              void router.push(`/boards/${id}`);
             });
           }}
         />
