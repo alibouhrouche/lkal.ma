@@ -22,8 +22,10 @@ export const NavigationSheet = () => {
         </Button>
       </SheetTrigger>
       <SheetContent>
-        <Logo />
-        <NavMenu orientation="vertical" className="mt-12" />
+        <div className="w-full p-3 h-14 flex items-center justify-left bg-card border-b border-accent">
+          <Logo />
+        </div>
+        <NavMenu orientation="vertical" className="w-full max-w-full [&_div]:w-full" />
       </SheetContent>
     </Sheet>
   );

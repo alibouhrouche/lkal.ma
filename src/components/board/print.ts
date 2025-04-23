@@ -39,21 +39,19 @@ export const print = async (editor: Editor) => {
     window.onload = function () {
         window.print();
     }
-    window.onafterprint = function () {
-        window.close();
-    }
     </script>
 </body>
 </html>
 `;
-  const w = window.open("", "_blank", `popup=yes`);
-  if (!w) {
-    toast.error("Failed to open print window", {
-      description: "Please allow popups for this site.",
+  const iframe = document.getElementById("print") as HTMLIFrameElement;
+  if (!iframe) {
+    toast.error("Failed to print", {
+      description: "Please try again later.",
+      duration: 5000,
     });
     return;
   }
-  w.document.open();
-  w.document.write(html);
-  w.document.close();
+  iframe.contentDocument?.open();
+  iframe.contentDocument?.write(html);
+  iframe.contentDocument?.close();
 };

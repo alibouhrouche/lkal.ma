@@ -1,34 +1,58 @@
 import type { NextConfig } from "next";
 import withSerwistInit from "@serwist/next";
-import createMDX from "@next/mdx";
 import withNextraInit from "nextra";
+import { globSync } from "glob";
+import path from "path";
+import crypto from "node:crypto";
+import { readFileSync, type PathOrFileDescriptor } from "node:fs";
+export const getFileHash = (file: PathOrFileDescriptor) => crypto.createHash("md5").update(readFileSync(file)).digest("hex");
+
 const revision = crypto.randomUUID();
+const pages = [
+    "/index.html", 
+    "/404.html", 
+    "/b/[id].html", 
+    "/boards.html", 
+    "/docs.html",
+    "/docs/components/button.html",
+    "/docs/components/data.html",
+    "/docs/components/image.html",
+    "/docs/components/instructions.html",
+    "/docs/components/text.html",
+];
+
+const publicDir = path.resolve("public");
+
+const publicScan = globSync(["**/*"], {
+    nodir: true,
+    cwd: publicDir,
+    ignore: ["swe-worker-*.js", "sw.js", "sw.js.map", "_redirects"],
+});
 
 const withSerwist = withSerwistInit({
-    // disable: process.env.NODE_ENV !== "production",
+    register: false,
     swSrc: "src/sw.ts",
     swDest: "public/sw.js",
-    // injectionPoint: "self.__WB_MANIFEST",
-    additionalPrecacheEntries: [
-        { url: "index.html", revision },
-        { url: "404.html", revision },
-        { url: "b/[id].html", revision },
-    ],
+    reloadOnOnline: false,
+    maximumFileSizeToCacheInBytes: 10 * 1024 * 1024,
+    additionalPrecacheEntries: [...publicScan.map((f) => ({
+        url: path.posix.join("/", f),
+        revision: getFileHash(path.join(publicDir, f)),
+    })), ...pages.map((page) => ({
+        url: page,
+        revision,
+    }))],
 });
 
 const withNextra = withNextraInit({
-    
-});
-
-const withMDX = createMDX({
-    // Add markdown plugins here, as desired
+    theme: './src/theme.tsx',
+    themeConfig: './src/theme.config.tsx',
 });
 
 const nextConfig: NextConfig = {
     /* config options here */
     reactStrictMode: true,
     distDir: "dist",
-    pageExtensions: ['js', 'jsx', 'md', 'mdx', 'ts', 'tsx'],
     output: "export",
     experimental: {
         reactCompiler: true,

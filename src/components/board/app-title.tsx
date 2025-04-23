@@ -4,6 +4,6 @@ import Head from "next/head";
 export const AppTitle = () => {
     const board = useBoard();
     return <Head>
-        <title>{`${board.board.name ?? "Loading..."} - Lkal.ma`}</title>
+        <title key="title">{`${board.board.name ?? "Loading..."} - Lkal.ma`}</title>
     </Head>
 }

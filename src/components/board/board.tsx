@@ -1,6 +1,6 @@
 import MainMenu from "@/components/board/main-menu";
 import SharePanel from "@/components/board/share-panel";
-import type {Editor, TLComponents} from "tldraw";
+import type { Editor, TLComponents } from "tldraw";
 import { ComponentTool, ComponentUtil } from "../tools";
 import {
   customAssetUrls,
@@ -12,11 +12,10 @@ import { useTheme } from "next-themes";
 import AppEvents from "./app-events";
 import ContextMenu from "./context-menu";
 import { cn } from "@/lib/utils";
-import React, {lazy, useCallback} from "react";
+import React, { useCallback } from "react";
 import embeds from "@/components/embeds";
 import TopPanel from "@/components/board/TopPanel.tsx";
-import {useRouter} from "next/router";
-const Tldraw = lazy(() => import("./tldraw.tsx"));
+import { Tldraw } from "tldraw";
 
 const components: TLComponents = {
   // Define your components here
@@ -37,7 +36,6 @@ export default function TldrawBoard({
   canEdit?: boolean;
   children?: React.ReactNode;
 }) {
-  const router = useRouter();
   const storeWithStatus = useYjsStore({
     shapeUtils,
   });
@@ -76,7 +74,7 @@ export default function TldrawBoard({
       }}
       deepLinks={{
         onChange(url: URL) {
-          router.replace(url);
+          history.replaceState(history.state, "", url.toString());
         },
       }}
     >

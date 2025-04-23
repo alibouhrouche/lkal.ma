@@ -7,7 +7,6 @@ import { cn } from "@/lib/utils";
 import { useObservable } from "dexie-react-hooks";
 import React from "react";
 import Link from "next/link";
-import Image from "next/image";
 
 const BoardCard = React.memo(function BoardCard({
   board,
@@ -40,12 +39,12 @@ const BoardCard = React.memo(function BoardCard({
         board.thumbnail[0].startsWith("data:") &&
         board.thumbnail[1].startsWith("data:") ? (
           <>
-            <Image
+            <img
               className="object-fit h-full w-full p-2 bg-[#f9fafb] dark:hidden"
               src={board.thumbnail[0]}
               alt={`Thumbnail for board "${board.name}"`}
             />
-            <Image
+            <img
               className="object-fit h-full w-full p-2 bg-[#101011] hidden dark:block"
               src={board.thumbnail[1]}
               alt={`Thumbnail for board "${board.name}"`}

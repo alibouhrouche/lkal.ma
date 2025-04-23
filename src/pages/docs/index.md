@@ -1,0 +1,8 @@
+---
+title: Introduction
+description: Lkalma your intelligent, collaborative whiteboard built for creative teams.
+---
+
+The Lkalma documentation is a work in progress. We are constantly updating and improving it to provide the best possible experience for our users. If you have any questions or feedback, please don't hesitate to reach out to us.
+
+The components are executed following the graph topological order, so the output of one component can be used as the input of another component. The components are executed in the order they are defined in the graph, so you can control the flow of data through the graph by changing the order of the components.

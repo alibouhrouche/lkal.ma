@@ -329,7 +329,7 @@ const VirtualGrid = React.memo(function VirtualGrid({
 }) {
   return (
     <VirtuosoGrid
-      style={{ height: "calc(100vh - 7rem)" }}
+      style={{ height: "calc(100vh - 7.5rem)" }}
       totalCount={data.length}
       components={gridComponents}
       data={data}
@@ -345,12 +345,14 @@ const VirtualGrid = React.memo(function VirtualGrid({
   );
 });
 
+const defaultCollections: string[] = []
+
 function BoardsGrid() {
   const [selectedCollectionsIds, setSelectedCollectionsIds] = useQueryState(
     "c",
-    parseAsArrayOf(parseAsString).withDefault([]),
+    parseAsArrayOf(parseAsString).withDefault(defaultCollections),
   );
-  const [selectedBoards, setSelectedBoards] = useState<string[]>([]);
+  const [selectedBoards, setSelectedBoards] = useState<string[]>(defaultCollections);
   const boards = useLiveQuery(
     () => db.boards.orderBy("created_at").reverse().toArray(),
     [],
@@ -376,7 +378,8 @@ function BoardsGrid() {
   }, [selectedCollections, boards]);
   return (
     <>
-      <div className="flex gap-2 px-6 py-1">
+      <div className="flex items-center gap-2 px-6 py-1 pt-2">
+        <div className="text-2xl">Boards</div>
         <BoardsCollections
           selectedBoards={selectedBoards}
           setSelectedBoards={setSelectedBoards}
@@ -393,7 +396,7 @@ function BoardsGrid() {
       ) : (
         <div
           className="w-full flex flex-col items-center justify-center"
-          style={{ height: "calc(100vh - 14rem)", marginBottom: "7rem" }}
+          style={{ height: "calc(100vh - 15rem)", marginBottom: "7.5rem" }}
         >
           <Spinner />
         </div>
@@ -402,10 +405,4 @@ function BoardsGrid() {
   );
 }
 
-export default function Boards() {
-  return (
-    <NuqsAdapter>
-      <BoardsGrid />
-    </NuqsAdapter>
-  );
-}
+export default BoardsGrid;

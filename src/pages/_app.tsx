@@ -1,10 +1,12 @@
 import "@/styles/globals.css";
-import {ThemeProvider} from "next-themes";
-import type {AppProps} from "next/app";
-import {Geist, Geist_Mono} from "next/font/google";
+import { ThemeProvider } from "next-themes";
+import type { AppProps } from "next/app";
+import { Geist, Geist_Mono } from "next/font/google";
 import AppGlobals from "@/components/app-globals";
-import {ReactElement, ReactNode} from "react";
-import {NextPage} from "next";
+import { ReactElement, ReactNode } from "react";
+import { ProgressProvider } from '@bprogress/next/pages';
+import { NextPage } from "next";
+import { NuqsAdapter } from "nuqs/adapters/next/pages";
 
 const geistSans = Geist({
     variable: "--font-sans",
@@ -24,7 +26,7 @@ type AppPropsWithLayout = AppProps & {
     Component: NextPageWithLayout;
 };
 
-export default function App({Component, pageProps}: AppPropsWithLayout) {
+export default function App({ Component, pageProps }: AppPropsWithLayout) {
     const getLayout = Component.getLayout ?? ((page) => page);
     return (
         <main className={`${geistSans.variable} ${geistMono.variable} font-sans`}>
@@ -34,8 +36,17 @@ export default function App({Component, pageProps}: AppPropsWithLayout) {
                 enableSystem
                 disableTransitionOnChange
             >
-                {getLayout(<Component {...pageProps} />)}
-                <AppGlobals/>
+                <ProgressProvider
+                    height="4px"
+                    color="#a855f7"
+                    options={{ showSpinner: false }}
+                    shallowRouting
+                >
+                    <NuqsAdapter>
+                        {getLayout(<Component {...pageProps} />)}
+                    </NuqsAdapter>
+                </ProgressProvider>
+                <AppGlobals />
             </ThemeProvider>
         </main>
     );

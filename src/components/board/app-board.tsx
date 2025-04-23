@@ -41,6 +41,7 @@ export default function AppBoard() {
     <BoardContext value={{ board }}>
       <AppTitle />
       <BoardWrapper />
+      <iframe id="print" className="fixed bottom-0 right-0 h-1 w-1 opacity-0" />
     </BoardContext>
   );
 }

@@ -122,7 +122,7 @@ function CollectionList({
 }) {
   return (
     <Command>
-      <CommandInput placeholder="Filter collections..." />
+      <CommandInput className="mt-0.5 h-8 border-0" placeholder="Filter collections..." />
       <CommandList>
         <CommandEmpty>No results found.</CommandEmpty>
         <CommandGroup>

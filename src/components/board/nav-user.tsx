@@ -12,6 +12,7 @@ import {
 import { DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
 import { Button } from "../ui/button";
 import { logout } from "@/db/logout";
+import Link from "next/link";
 
 function License({ user }: { user: UserLogin }) {
   const { license } = user;
@@ -60,12 +61,12 @@ export default function NavUser({ user }: { user: UserLogin }) {
         <DropdownMenuLabel className="font-normal">
           <License user={user} />
         </DropdownMenuLabel>
-        <a href="/boards">
+        <Link href="/boards">
           <DropdownMenuItem>Boards</DropdownMenuItem>
-        </a>
-        <a href="/docs">
+        </Link>
+        <Link href="/docs">
           <DropdownMenuItem>Docs</DropdownMenuItem>
-        </a>
+        </Link>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => logout()}>Logout</DropdownMenuItem>
       </DropdownMenuContent>

@@ -1,6 +1,12 @@
-import HeroButtons from "./hero-buttons";
 import Image from "next/image";
 import heroImage from "@/assets/hero-image.jpg";
+import dynamic from "next/dynamic";
+import { Skeleton } from "../ui/skeleton";
+
+const HeroButtons = dynamic(() => import("./hero-buttons"), {
+  ssr: false,
+  loading: () => <Skeleton slot="fallback" className="h-10 w-[300px]"/>,
+});
 
 export default function Hero() {
   return (

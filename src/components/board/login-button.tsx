@@ -2,8 +2,9 @@ import { db } from "@/db";
 import { useObservable } from "dexie-react-hooks";
 import { Button } from "../ui/button";
 import NavUser from "./nav-user";
+import React from "react";
 
-export default function LoginButton({children}: {children?: React.ReactNode}) {
+export default function LoginButton({ children, loggedOut }: { children?: React.ReactNode; loggedOut?: React.ReactNode }) {
   const user = useObservable(db.cloud.currentUser);
   if (user?.isLoggedIn) {
     return (
@@ -14,13 +15,16 @@ export default function LoginButton({children}: {children?: React.ReactNode}) {
     );
   }
   return (
-    <Button
-      className="tl-cursor-pointer cursor-pointer"
-      onClick={() => {
-        db.cloud.login();
-      }}
-    >
-      Login
-    </Button>
+    <>
+      <Button
+        className="tl-cursor-pointer cursor-pointer"
+        onClick={() => {
+          db.cloud.login();
+        }}
+      >
+        Login
+      </Button>
+      {loggedOut}
+    </>
   );
 }

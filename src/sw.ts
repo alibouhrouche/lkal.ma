@@ -1,6 +1,6 @@
 import { defaultCache } from "@serwist/next/worker";
 import type { PrecacheEntry, SerwistGlobalConfig } from "serwist";
-import { NavigationRoute, RegExpRoute, Serwist, StaleWhileRevalidate } from "serwist";
+import { CacheFirst, NavigationRoute, RegExpRoute, Serwist, StaleWhileRevalidate } from "serwist";
 import { db, userPromise } from "./db";
 
 declare global {
@@ -22,9 +22,13 @@ const boardAssets = /\/b\/([^/]+?)\/(asset:[^/]+?)\/?$/i;
 
 const serwist = new Serwist({
   precacheEntries: self.__SW_MANIFEST,
-  skipWaiting: true,
-  clientsClaim: true,
+  skipWaiting: false,
+  clientsClaim: false,
   navigationPreload: false,
+  precacheOptions: {
+    cleanupOutdatedCaches: true,
+    cleanURLs: true,
+  }
 });
 
 const boards = isProd
@@ -86,9 +90,22 @@ serwist.registerCapture(
   }),
 );
 
+// serwist.registerCapture(
+//   ({ url }) => {
+//     return url.host === "cdn.tldraw.com";
+//   },
+//   new CacheFirst({
+//     cacheName: "tldraw",
+//     fetchOptions: {
+//       mode: "cors",
+//       credentials: "omit",
+//     },
+//   }),
+// )
+
 serwist.registerCapture(
   new NavigationRoute(
-    isProd ? serwist.createHandlerBoundToUrl("/404") : networkFallback,
+    isProd ? serwist.createHandlerBoundToUrl("/404.html") : networkFallback,
   ),
 );
 

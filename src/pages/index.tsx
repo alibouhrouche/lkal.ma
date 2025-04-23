@@ -12,7 +12,7 @@ export default function Home() {
                 Whiteboarding Without Limits - Lkal.ma
             </title>
         </Head>
-        <Navbar />
+        <Navbar className="sticky top-0 z-10" />
         <Hero />
         <Features />
         <FAQ />
