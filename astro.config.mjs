@@ -93,6 +93,7 @@ export default defineConfig({
         "**/*.jpg",
         "**/*.jpeg",
         "**/*.webp",
+        "**/*.json",
         "fonts/*.woff2",
         "translations/*.json",
       ],
