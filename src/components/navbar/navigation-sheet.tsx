@@ -10,7 +10,7 @@ import { Menu } from "lucide-react";
 import { Logo } from "../logo";
 import { NavMenu } from "./nav-menu";
 
-export const NavigationSheet = () => {
+export const NavigationSheet = ({pathname}: {pathname:string}) => {
   return (
     <Sheet>
       <VisuallyHidden>
@@ -23,7 +23,7 @@ export const NavigationSheet = () => {
       </SheetTrigger>
       <SheetContent>
         <Logo />
-        <NavMenu orientation="vertical" className="mt-12" />
+        <NavMenu pathname={pathname} orientation="vertical" className="mt-12" />
       </SheetContent>
     </Sheet>
   );

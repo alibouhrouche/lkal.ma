@@ -51,7 +51,7 @@ const Features = () => {
   return (
     <div id="features" className="max-w-screen-xl mx-auto w-full py-20 px-6">
       <h2 className="text-4xl md:text-5xl md:leading-[3.5rem] font-bold tracking-tight sm:max-w-xl sm:text-center sm:mx-auto">
-        Features
+        <span className="text">Features</span>
       </h2>
       <div className="mt-14 w-full mx-auto grid md:grid-cols-2 lg:grid-cols-3 gap-x-10 gap-y-12">
         {features.map((feature) => (
@@ -62,10 +62,10 @@ const Features = () => {
             <CardHeader>
               <feature.icon />
               <h4 className="!mt-3 text-xl font-bold tracking-tight">
-                {feature.title}
+                <span className="text">{feature.title}</span>
               </h4>
               <p className="mt-1 text-muted-foreground text-[17px]">
-                {feature.description}
+                <span className="text">{feature.description}</span>
               </p>
             </CardHeader>
           </Card>

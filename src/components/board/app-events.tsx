@@ -1,4 +1,4 @@
-import { useTheme } from "next-themes";
+import { useTheme } from "@/lib/next-themes";
 import { useEffect } from "react";
 import { useEditor } from "tldraw";
 import { db } from "@/db";

@@ -51,8 +51,8 @@ export const runners: Record<
     const { namedInputs, unnamedInputs } = getData(
       editor,
       shape,
-      "text/plain",
-      ["text/plain", "image/*"],
+      "text/html",
+      ["text/html", "image/*"],
     );
     const img = hasImage({unnamedInputs, namedInputs});
     if (img) {

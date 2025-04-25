@@ -8,7 +8,7 @@ import {
   uiOverrides,
 } from "../tools/ui-overrides";
 import { useYjsStore } from "@/hooks/useYjsStore";
-import { useTheme } from "next-themes";
+import { useTheme } from "@/lib/next-themes";
 import AppEvents from "./app-events";
 import ContextMenu from "./context-menu";
 import { cn } from "@/lib/utils";

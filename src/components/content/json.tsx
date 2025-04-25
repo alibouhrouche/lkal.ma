@@ -1,6 +1,6 @@
 import { JsonEditor, githubDarkTheme, githubLightTheme } from "json-edit-react";
 import { ComponentShape } from "../tools";
-import { useTheme } from "next-themes";
+import { useTheme } from "@/lib/next-themes";
 import { preventDefault, stopEventPropagation, useEditor } from "tldraw";
 import React from "react";
 

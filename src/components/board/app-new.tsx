@@ -6,13 +6,13 @@ import { navigate } from "wouter/use-browser-location";
 
 export const newBoard = () => {
   db.newBoard().then((id) => {
-    location.href = `/b/${id}`;
+    navigate(`/b/${id}`);
   });
 };
 
 export const NewBoard = () => {
   return (
-    <div className="cursor-pointer rounded-xl" onClick={newBoard}>
+    <div className="tl-cursor-pointer rounded-xl" onClick={newBoard}>
       <AspectRatio
         ratio={16 / 9}
         className="p-1 hover:bg-primary/50 rounded-xl"
@@ -25,15 +25,9 @@ export const NewBoard = () => {
   );
 };
 
-export const newBoardRouter = () => {
-  db.newBoard().then((id) => {
-    navigate(`/b/${id}`);
-  });
-}
-
 export const NewBoardLink = () => {
   return (
-    <div onClick={newBoardRouter} className="w-full">
+    <div onClick={newBoard} className="w-full">
       <SidebarMenuButton className="cursor-pointer flex justify-end">
         <FilePlus2Icon size={24} />
         <span>New</span>

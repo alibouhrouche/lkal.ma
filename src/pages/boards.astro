@@ -1,35 +1,8 @@
 ---
 import Layout from "@/layouts/Layout.astro";
-import BoardsGrid from "@/components/boards";
-import { Logo } from "@/components/logo";
-import ModeToggle from "@/components/mode-toggle";
-import LoginButton from "@/components/board/login-button";
-import { Loading } from "@/components/loading";
-import { SyncStatus } from "@/components/sync-status";
+import App from "@/app";
 ---
 
 <Layout title="Boards">
-  <div>
-    <div class="w-full h-16 bg-card flex items-center p-4 justify-between">
-      <div class="flex items-center gap-2">
-        <a href="/" class="relative flex gap-4 items-center">
-          <Logo />
-          <div class="text-2xl">Boards</div>
-        </a>
-        <a href="/docs" class="text-blue-500">
-          Docs
-        </a>
-      </div>
-      <div class="sm:absolute sm:left-1/2 transform sm:-translate-x-1/2">
-        <SyncStatus client:only="react" />
-      </div>
-      <div class="flex gap-4 items-center">
-        <ModeToggle client:load />
-        <LoginButton client:only="react" />
-      </div>
-    </div>
-    <BoardsGrid client:only="react">
-      <Loading slot="fallback" />
-    </BoardsGrid>
-  </div>
+  <App ssrPath="/boards" client:load />
 </Layout>

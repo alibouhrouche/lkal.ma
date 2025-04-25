@@ -1,12 +1,11 @@
-import { ThemeProvider } from "next-themes";
 import { SidebarProvider } from "../ui/sidebar";
 import { AppSidebar } from "./app-sidebar";
 import { AppContext } from "./context";
 import { AppTitle } from "./app-title";
 import { useRoute } from "wouter";
-import {LoadingFallback, Spinner} from "../loading";
+import { LoadingFallback, Spinner } from "../loading";
 import AppStatus from "./app-status.tsx";
-import {Suspense} from "react";
+import { Suspense } from "react";
 import AppBoard from "@/components/board/app-board.tsx";
 
 export default function App() {
@@ -33,22 +32,15 @@ export default function App() {
 
   return (
     <AppContext.Provider value={{ id: params.id }}>
-      <ThemeProvider
-        attribute="class"
-        defaultTheme="system"
-        enableSystem
-        disableTransitionOnChange
-      >
-        <SidebarProvider defaultOpen={defaultOpen}>
-          <AppTitle />
-          <AppSidebar />
-          <main className="w-full">
-            <Suspense fallback={<LoadingFallback />}>
-              <AppBoard />
-            </Suspense>
-          </main>
-        </SidebarProvider>
-      </ThemeProvider>
+      <SidebarProvider defaultOpen={defaultOpen}>
+        <AppTitle />
+        <AppSidebar />
+        <main className="w-full">
+          <Suspense fallback={<LoadingFallback />}>
+            <AppBoard />
+          </Suspense>
+        </main>
+      </SidebarProvider>
     </AppContext.Provider>
   );
 }

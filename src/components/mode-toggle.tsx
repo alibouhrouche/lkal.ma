@@ -8,8 +8,7 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useTheme } from "next-themes";
-import { ThemeProvider } from "next-themes";
+import { ThemeProvider, useTheme } from "@/lib/next-themes";
 
 export function ModeToggle() {
   const { theme, setTheme } = useTheme();

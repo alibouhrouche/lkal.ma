@@ -5,6 +5,7 @@ import tailwindcss from "@tailwindcss/vite";
 import AstroPWA from "@vite-pwa/astro";
 
 import starlight from "@astrojs/starlight";
+import starlightThemeBlack from 'starlight-theme-black';
 
 const ReactCompilerConfig = {
   /* ... */
@@ -21,11 +22,68 @@ export default defineConfig({
         plugins: [["babel-plugin-react-compiler", ReactCompilerConfig]],
       },
     }),
+    starlight({
+      title: "Lkal.ma",
+      disable404Route: true,
+      logo: {
+        src: "@/assets/logo.svg",
+        alt: "Lkal.ma Logo",
+        replacesTitle: true,
+      },
+      sidebar: [
+        {
+          label: "Getting Started",
+          items: [
+            {
+              label: "Introduction",
+              link: "/docs",
+            },
+          ],
+        },
+        {
+          label: "Components",
+          items: [
+            {
+              label: "Text",
+              link: "/docs/components/text",
+            },{
+              label: "Button",
+              link: "/docs/components/button",
+            },{
+              label: "Image",
+              link: "/docs/components/image",
+            },{
+              label: "Instructions",
+              link: "/docs/components/instructions",
+            },{
+              label: "Data",
+              link: "/docs/components/data",
+            },
+          ]
+        }
+      ],
+      plugins: [
+        starlightThemeBlack({
+          navLinks: [{
+            link: "/",
+            label: "Home",
+          }, {
+            link: "/boards",
+            label: "Boards",
+          }],
+          footerText: `&copy; ${new Date().getFullYear()} [Ali Bouhrouche](https://ali.js.org). All rights reserved.`,
+        }),
+      ],
+    }),
     AstroPWA({
       registerType: "prompt",
       strategies: "injectManifest",
       injectManifest: {
         maximumFileSizeToCacheInBytes: 5000000,
+        globPatterns: [
+          '**/*.{js,css,html}',
+          '_astro/**',
+        ]
       },
       srcDir: "src",
       filename: "sw.ts",
@@ -34,6 +92,7 @@ export default defineConfig({
         "**/*.png",
         "**/*.jpg",
         "**/*.jpeg",
+        "**/*.webp",
         "fonts/*.woff2",
         "translations/*.json",
       ],
@@ -125,15 +184,6 @@ export default defineConfig({
         theme_color: "#2d9145",
         background_color: "#2d9145",
         display: "standalone",
-      },
-    }),
-    starlight({
-      title: "Lkal.ma",
-      disable404Route: true,
-      logo: {
-        src: "@/assets/logo.svg",
-        alt: "Lkal.ma Logo",
-        replacesTitle: true,
       },
     }),
   ],

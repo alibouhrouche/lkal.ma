@@ -1,20 +1,24 @@
 ---
+import { cn } from "@/lib/utils";
 import LoginButton from "../board/login-button";
 import { Logo } from "../logo";
 import { ModeToggle } from "../mode-toggle";
 import { Skeleton } from "../ui/skeleton";
 import { NavMenu } from "./nav-menu";
 import { NavigationSheet } from "./navigation-sheet";
+interface Props {
+  pathname?: string;
+  className?: string;
+}
+const { pathname = "/", className } = Astro.props;
 ---
 
-<nav class="h-16 bg-background border-b border-accent">
-  <div
-    class="h-full flex items-center justify-between max-w-screen-xl mx-auto px-4 sm:px-6"
-  >
-    <Logo />
+<nav class={cn("h-16 bg-background border-b border-accent", className)}>
+  <div class="h-full flex items-center justify-between max-w-screen-xl mx-auto px-4 sm:px-6">
+    <a href="/"><Logo /></a>
 
     {/* Desktop Menu */}
-    <NavMenu className="hidden md:block" />
+    <NavMenu pathname={pathname} className="hidden md:block" />
 
     <div class="flex items-center gap-3">
       <ModeToggle client:load />
@@ -24,7 +28,7 @@ import { NavigationSheet } from "./navigation-sheet";
 
       {/* Mobile Menu */}
       <div class="md:hidden">
-        <NavigationSheet client:visible />
+        <NavigationSheet pathname={pathname} client:visible />
       </div>
     </div>
   </div>

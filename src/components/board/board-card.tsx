@@ -5,8 +5,8 @@ import { Board, db } from "@/db";
 import { PencilIcon, Trash2Icon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useObservable } from "dexie-react-hooks";
-import LinkComp from "./LinkComp";
 import React from "react";
+import { Link } from "wouter";
 
 const BoardCard = React.memo(function BoardCard({
   board,
@@ -26,7 +26,7 @@ const BoardCard = React.memo(function BoardCard({
   return (
     <div
       className={cn(
-        "cursor-pointer data-[active=true]:bg-primary hover:bg-primary/50 rounded-xl",
+        "tl-cursor-pointer data-[active=true]:bg-primary hover:bg-primary/50 rounded-xl",
         classname
       )}
       data-active={board.id === currentBoardId}
@@ -54,7 +54,7 @@ const BoardCard = React.memo(function BoardCard({
           <div className="absolute bg-[#f9fafb] dark:bg-[#101011] h-full w-full" />
         )}
         {currentBoardId !== board.id ? (
-          <LinkComp
+          <Link
             href={`/b/${board.id}`}
             className="absolute inset-0 bg-gradient-to-t from-white dark:from-black from-10% to-50%"
           />
@@ -64,9 +64,9 @@ const BoardCard = React.memo(function BoardCard({
         <div className="absolute bottom-0 w-full px-2">
           <div className="text-black dark:text-white flex gap-2 items-center justify-between bg-opacity-50 p-1 text-xs">
             {currentBoardId !== board.id ? (
-              <LinkComp href={`/b/${board.id}`} className="flex-1">
+              <Link href={`/b/${board.id}`} className="flex-1">
                 {board.name}
-              </LinkComp>
+              </Link>
             ) : (
               <div>{board.name} </div>
             )}

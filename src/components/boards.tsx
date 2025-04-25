@@ -50,6 +50,7 @@ import { NuqsAdapter } from "nuqs/adapters/react";
 import { parseAsArrayOf, parseAsString, useQueryState } from "nuqs";
 import { Spinner } from "./loading";
 import { NewBoard } from "./board/app-new";
+import { useBoards } from "@/context/boards";
 
 const List = forwardRef<HTMLDivElement, HtmlHTMLAttributes<HTMLDivElement>>(
   ({ style, children, ...props }, ref) => (
@@ -347,15 +348,12 @@ const VirtualGrid = React.memo(function VirtualGrid({
 });
 
 function BoardsGrid() {
+  const boards = useBoards();
   const [selectedCollectionsIds, setSelectedCollectionsIds] = useQueryState(
     "c",
     parseAsArrayOf(parseAsString).withDefault([])
   );
   const [selectedBoards, setSelectedBoards] = useState<string[]>([]);
-  const boards = useLiveQuery(
-    () => db.boards.orderBy("created_at").reverse().toArray(),
-    []
-  );
   const selectedCollections = useLiveQuery(
     () => db.spaces.where("id").anyOf(selectedCollectionsIds).toArray(),
     [selectedCollectionsIds]

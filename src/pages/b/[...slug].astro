@@ -1,15 +1,11 @@
 ---
-import App from "../../components/board/app";
-import { Loading } from "@/components/loading";
+import App from "@/app";
 import Layout from "@/layouts/Layout.astro";
-import "@/syntax.css";
 export async function getStaticPaths() {
   return [{ params: { slug: undefined } }];
 }
 ---
 
-<Layout title="loading...">
-  <App client:only>
-    <Loading slot="fallback" />
-  </App>
+<Layout>
+  <App ssrPath="/b" client:load />
 </Layout>

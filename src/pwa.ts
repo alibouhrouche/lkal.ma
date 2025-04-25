@@ -14,12 +14,7 @@ export const registerPWA = () => {
         action: {
           label: "Reload",
           onClick: () => {
-            toast.promise(updateServiceWorker(true), {
-              id,
-              loading: "Updating...",
-              success: "Reloading...",
-              error: "Failed to update, please try again later.",
-            });
+            updateServiceWorker(true);
           },
         },
         cancel: {

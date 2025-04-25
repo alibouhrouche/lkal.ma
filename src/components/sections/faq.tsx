@@ -59,16 +59,16 @@ const FAQ = () => {
   return (
     <div id="faq" className="w-full max-w-screen-xl mx-auto py-20 px-6">
       <h2 className="md:text-center text-4xl md:text-5xl !leading-[1.15] font-bold tracking-tighter">
-        Frequently Asked Questions
+        <span className="text">Frequently Asked Questions</span>
       </h2>
       <p className="mt-1.5 md:text-center text-lg text-muted-foreground">
-        Quick answers to common questions about our products and services.
+        <span className="text">Quick answers to common questions about our products and services.</span>
       </p>
 
       <Accordion
         type="single"
         collapsible
-          className="mt-8 space-y-4 gap-4"
+        className="mt-8 space-y-4 gap-4"
       >
         {faq.map(({ question, answer }, index) => (
           <AccordionItem
@@ -88,7 +88,7 @@ const FAQ = () => {
               </AccordionPrimitive.Trigger>
             </AccordionPrimitive.Header>
             <AccordionContent className="text-[15px]">
-              {answer}
+              <span className="text">{answer}</span>
             </AccordionContent>
           </AccordionItem>
         ))}

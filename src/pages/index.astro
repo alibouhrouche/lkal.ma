@@ -1,5 +1,4 @@
 ---
-import { StatusIcon } from "../components/status-icon";
 import Navbar from "@/components/navbar/navbar.astro";
 import FAQ from "@/components/sections/faq";
 import Features from "@/components/sections/features";
@@ -14,7 +13,4 @@ import Layout from "@/layouts/Layout.astro";
   <Features />
   <FAQ client:load />
   <Footer />
-  <div class="fixed bottom-0 right-0 opacity-50">
-    <StatusIcon client:only="react" />
-  </div>
 </Layout>

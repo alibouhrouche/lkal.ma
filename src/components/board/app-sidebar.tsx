@@ -5,21 +5,17 @@ import {
   SidebarHeader,
   SidebarMenuButton,
 } from "@/components/ui/sidebar";
-import { db } from "@/db";
-import { useLiveQuery } from "dexie-react-hooks";
 import { Scroller } from "../ui/scroll-area";
 import BoardCard from "./board-card";
 import { ArrowLeftIcon } from "lucide-react";
 import { Virtuoso } from "react-virtuoso";
-import { useApp } from "./context";
 import { NewBoardLink } from "./app-new";
-import { prefetch } from "astro:prefetch";
+import { useBoards } from "@/context/boards";
+import { Link, useParams } from "wouter";
 
 function BoardsList() {
-  const id = useApp().id!;
-  const boards = useLiveQuery(() =>
-    db.boards.orderBy("created_at").reverse().toArray()
-  );
+  const id = useParams<{ id: string }>()?.id;
+  const boards = useBoards();
   return (
     <Virtuoso
       className="h-screen"
@@ -37,20 +33,16 @@ function BoardsList() {
   );
 }
 
-const prefetchBoards = () => {
-  prefetch("/boards");
-}
-
 export function AppSidebar() {
   return (
     <Sidebar>
       <SidebarHeader className="flex flex-row items-center justify-between">
-        <a href="/boards" className="w-full" onMouseOver={prefetchBoards}>
+        <Link href="/boards" className="w-full">
           <SidebarMenuButton className="cursor-pointer">
             <ArrowLeftIcon size={24} />
             <span>See all</span>
           </SidebarMenuButton>
-        </a>
+        </Link>
         <NewBoardLink />
       </SidebarHeader>
       <SidebarContent>

@@ -74,7 +74,7 @@ function AppStatus({
       <div
         className={cn(
           "flex items-center justify-center space-x-2 p-2",
-          colors[sync?.status as SyncStatus],
+          colors[sync?.status as SyncStatus] || "text-muted-foreground",
           className,
         )}
       >
@@ -103,7 +103,7 @@ function AppStatusText({ className }: { className?: string }) {
   }
   return (
     <span className={cn("text-xs capitalize", className)}>
-      {sync?.status.replace("-", " ")}
+      {sync?.status.replace("-", " ") ?? "not started"}
     </span>
   );
 }

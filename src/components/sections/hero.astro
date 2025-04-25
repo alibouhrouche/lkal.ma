@@ -1,38 +1,41 @@
 ---
-import {Picture} from "astro:assets";
-import {Skeleton} from "../ui/skeleton";
+import { Picture } from "astro:assets";
+import { Skeleton } from "../ui/skeleton";
 import HeroButtons from "./hero-buttons.tsx";
 import heroImage from "@/assets/hero-image.jpg";
 ---
 
 <div
-        class="min-h-[calc(100vh-4rem)] w-full flex items-center justify-center overflow-hidden border-b border-accent"
+    class="min-h-[calc(100vh-4rem)] w-full flex items-center justify-center overflow-hidden border-b border-accent"
 >
     <div
-            class="max-w-screen-xl w-full flex flex-col lg:flex-row mx-auto items-center justify-between gap-y-14 gap-x-10 px-6 py-12 lg:py-0"
+        class="max-w-screen-xl w-full flex flex-col lg:flex-row mx-auto items-center justify-between gap-y-14 gap-x-10 px-6 py-12 lg:py-0"
     >
         <div class="max-w-xl">
             <h1
-                    class="mt-6 max-w-[20ch] text-5xl lg:text-[2.75rem] xl:text-5xl font-bold !leading-[1.2] tracking-tight"
+                class="mt-6 max-w-[20ch] text-5xl lg:text-[2.75rem] xl:text-5xl font-bold !leading-[1.2] tracking-tight"
             >
-                Whiteboarding Without Limits
+                <span class="text">Whiteboarding Without Limits</span>
             </h1>
             <p class="mt-6 max-w-[60ch] text-lg">
-                A next-gen collaborative whiteboard built on tldraw with Dexie Cloud for
-                seamless teamwork—online and offline.
+                <span class="text">
+                    A next-gen collaborative whiteboard built on tldraw with
+                    Dexie Cloud for seamless teamwork—online and offline.
+                </span>
             </p>
             <div class="mt-12 flex items-center gap-4">
                 <HeroButtons client:only>
-                    <Skeleton slot="fallback" className="h-10 w-[300px]"/>
+                    <Skeleton slot="fallback" className="h-10 w-[300px]" />
                 </HeroButtons>
             </div>
         </div>
         <div
-                class="relative lg:max-w-lg xl:max-w-xl w-full bg-accent rounded-xl aspect-square"
+            class="relative lg:max-w-lg xl:max-w-xl w-full bg-accent rounded-xl aspect-square"
         >
             <Picture
-                formats={['avif', 'webp']}
+                formats={["avif", "webp"]}
                 src={heroImage}
+                loading="eager"
                 alt="Designer choosing color"
                 class="object-cover rounded-xl"
             />
