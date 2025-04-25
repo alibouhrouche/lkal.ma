@@ -10,9 +10,17 @@ html {
     --tl-cursor-zoom-out: url("data:image/svg+xml,<svg height='32' width='32' viewBox='0 0 32 32' xmlns='http://www.w3.org/2000/svg' style='color: black;'><defs><filter id='shadow' y='-40%' x='-40%' width='180px' height='180%' color-interpolation-filters='sRGB'><feDropShadow dx='1' dy='1' stdDeviation='1.2' flood-opacity='.5'/></filter></defs><g fill='none' transform='rotate(0 16 16)' filter='url(%23shadow)'><path d='m20.5 15c0 3.038-2.462 5.5-5.5 5.5s-5.5-2.462-5.5-5.5 2.462-5.5 5.5-5.5 5.5 2.462 5.5 5.5' fill='white'/><path d='m20.5 15c0 3.038-2.462 5.5-5.5 5.5s-5.5-2.462-5.5-5.5 2.462-5.5 5.5-5.5 5.5 2.462 5.5 5.5z' stroke='black'/><g fill='black'><path d='m18 16h-5.98v-1.98h5.98z'/><path d='m23.5859 25 1.414-1.414-5.449-5.449-1.414 1.414z'/></g></g></svg>") 16 16, zoom-out;
     cursor: var(--tl-cursor-default);
 }
-button, a:link, .tlui-button {
+
+button,
+a:link,
+a:active {
     cursor: var(--tl-cursor-pointer);
 }
-span.text:hover, input {
+.tlui-button {
+    cursor: var(--tl-cursor-pointer) !important;
+}
+
+span.text:hover,
+input {
     cursor: var(--tl-cursor-text);
 }
