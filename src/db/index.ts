@@ -9,6 +9,15 @@ const alphabet =
   "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 const nanoid = customAlphabet(alphabet, 23);
 
+const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+function formatDate(date: Date) {
+  const month = months[date.getMonth()];
+  const day = date.getDate().toString().padStart(2, "0");
+  const hour = date.getHours().toString().padStart(2, "0");
+  const minute = date.getMinutes().toString().padStart(2, "0");
+  return `${month} ${day} ${hour}:${minute}`;
+}
+
 type BoardAssets = {
   [name: string]: Blob | string;
 };
@@ -63,15 +72,16 @@ class DB extends Dexie {
     return this.transaction("rw", db.realms, db.boards, async () => {
       const id = nanoid();
       const now = new Date();
+      const name = formatDate(now);
       // Create a new realm
       const newRealmId = await db.realms.add({
-        name: `New Board`,
+        name,
         represents: `a board`,
       });
       // Create board and put it in the new realm.
       return this.boards.add({
         id,
-        name: "New Board",
+        name,
         created_at: now,
         updated_at: now,
         realmId: newRealmId,
