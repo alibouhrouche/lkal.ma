@@ -20,8 +20,8 @@ const Footer = () => {
         {/* Copyright */}
         <span className="text text-muted-foreground">
           &copy; {new Date().getFullYear()}{" "}
-          <a href="https://ali.js.org" target="_blank">
-            Ali Bouhrouche
+          <a href="https://iev.digital" target="_blank">
+            IEV Digital Ltd
           </a>
           . All rights reserved.
         </span>
