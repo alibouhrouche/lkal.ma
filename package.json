@@ -10,8 +10,8 @@
     "astro": "astro"
   },
   "dependencies": {
-    "@astrojs/react": "4.2.4",
-    "@astrojs/starlight": "0.34.0",
+    "@astrojs/react": "4.2.7",
+    "@astrojs/starlight": "0.34.2",
     "@fontsource/geist-mono": "^5.2.5",
     "@fontsource/geist-sans": "^5.2.5",
     "@icons-pack/react-simple-icons": "^12.3.0",
@@ -58,7 +58,7 @@
     "@tiptap/pm": "^2.11.5",
     "@tiptap/react": "^2.11.5",
     "@tldraw/assets": "^3.10.1",
-    "astro": "^5.7.4",
+    "astro": "^5.7.10",
     "babel-plugin-react-compiler": "19.0.0-beta-aeaed83-20250323",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
