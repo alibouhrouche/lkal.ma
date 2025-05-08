@@ -18,10 +18,12 @@ const Footer = () => {
       <Separator />
       <div className="max-w-screen-xl mx-auto py-8 flex flex-col-reverse sm:flex-row items-center justify-between gap-x-2 gap-y-5 px-6 xl:px-0">
         {/* Copyright */}
-        <span className="text text-muted-foreground">
-          &copy; {new Date().getFullYear()}{" "}
-          <a href="https://iev.digital" target="_blank">
+        <span className="text text-sm text-muted-foreground">
+          &copy; {new Date().getFullYear()} Lkalma By {" "}
+          <a className="underline" href="https://iev.digital" target="_blank">
             IEV Digital Ltd
+          </a>. Crafted By <a className="underline" href="https://ali.js.org" target="_blank">
+            Ali Bouhrouche
           </a>
           . All rights reserved.
         </span>

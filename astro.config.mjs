@@ -71,7 +71,7 @@ export default defineConfig({
             link: "/boards",
             label: "Boards",
           }],
-          footerText: `&copy; ${new Date().getFullYear()} [Ali Bouhrouche](https://ali.js.org). All rights reserved.`,
+          footerText: `&copy; ${new Date().getFullYear()} Lkalma By [IEV Digital Ltd](https://iev.digital). Crafted By [Ali Bouhrouche](https://ali.js.org). All rights reserved.`,
         }),
       ],
     }),

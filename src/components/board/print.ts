@@ -21,7 +21,7 @@ export const print = async (editor: Editor) => {
   if (!svg) {
     return;
   }
-    const html = `<!doctype html>
+  const html = `<!doctype html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
@@ -46,14 +46,21 @@ export const print = async (editor: Editor) => {
 </body>
 </html>
 `;
-  const w = window.open("", "_blank", `popup=yes`);
-  if (!w) {
-    toast.error("Failed to open print window", {
-      description: "Please allow popups for this site.",
+  const iframe = document.getElementById("print") as HTMLIFrameElement;
+  if (!iframe) {
+    toast.error("Failed to print", {
+      description: "Please try again later.",
     });
     return;
   }
-  w.document.open();
-  w.document.write(html);
-  w.document.close();
+  const doc = iframe.contentDocument;
+  if (!doc) {
+    toast.error("Failed to print", {
+      description: "Please try again later.",
+    });
+    return;
+  }
+  doc.open();
+  doc.write(html);
+  doc.close();
 };
